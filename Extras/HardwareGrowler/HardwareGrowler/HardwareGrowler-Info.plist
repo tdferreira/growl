@@ -30,6 +30,14 @@
 	<true/>
 	<key>NSHumanReadableCopyright</key>
 	<string>${COPYRIGHT}</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>HardwareGrowler monitors Bluetooth device connection changes so it can notify you when devices connect or disconnect.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>HardwareGrowler monitors Bluetooth device connection changes so it can notify you when devices connect or disconnect.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>HardwareGrowler uses location permission only to read the current Wi-Fi network name for network change notifications.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>HardwareGrowler uses location permission only to read the current Wi-Fi network name for network change notifications.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>

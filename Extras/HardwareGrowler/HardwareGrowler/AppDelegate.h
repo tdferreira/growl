@@ -6,7 +6,8 @@
 //  Copyright (c) 2012 The Growl Project, LLC. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
+#import <AppKit/AppKit.h>
+#import <Foundation/Foundation.h>
 
 @class GrowlOnSwitch, HWGrowlPluginController;
 
@@ -27,6 +28,19 @@ typedef enum : NSInteger {
 	
 	HWGrowlIconState oldIconValue;
 	BOOL oldOnLoginValue;
+	BOOL launchedByLoginHelper;
+	BOOL pendingPreferencesOpen;
+	BOOL suppressNextPreferencesOpen;
+	BOOL preferencesOpenedAutomatically;
+	NSDate *suppressPreferencesUntil;
+	NSDate *automaticPreferencesOpenDate;
+	NSTimer *duplicateCleanupTimer;
+	NSView *modernGeneralView;
+	NSScrollView *modernModulesScrollView;
+	NSView *modernModulesContentView;
+	NSSwitch *startAtLoginSwitch;
+	NSSwitch *showExistingSwitch;
+	NSSegmentedControl *visibilitySegmentedControl;
 	
 	HWGrowlPluginController *pluginController;
 		

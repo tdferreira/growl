@@ -33,29 +33,43 @@ static void usbDeviceRemoved(void *refCon, io_iterator_t iterator);
 @synthesize notificationRunLoopSource;
 
 -(void)dealloc {
-	if (self.ioKitNotificationPort) {
-		CFRunLoopRemoveSource(CFRunLoopGetCurrent(), self.notificationRunLoopSource, kCFRunLoopDefaultMode);
-		IONotificationPortDestroy(self.ioKitNotificationPort);
-	}
+	[self stopObserving];
 	[super dealloc];
 }
 
 -(id)init {
 	if((self = [super init])){
 		self.notificationsArePrimed = NO;
-
-		self.ioKitNotificationPort = IONotificationPortCreate(kIOMasterPortDefault);
-		self.notificationRunLoopSource = IONotificationPortGetRunLoopSource(ioKitNotificationPort);
-		
-		CFRunLoopAddSource(CFRunLoopGetCurrent(),
-								 notificationRunLoopSource,
-								 kCFRunLoopDefaultMode);
 	}
 	return self;
 }
 
 -(void)postRegistrationInit {
+	[self startObserving];
+}
+
+-(void)startObserving {
+	if (self.ioKitNotificationPort)
+		return;
+	
+	self.notificationsArePrimed = NO;
+	self.ioKitNotificationPort = IONotificationPortCreate(kIOMasterPortDefault);
+	self.notificationRunLoopSource = IONotificationPortGetRunLoopSource(ioKitNotificationPort);
+	
+	CFRunLoopAddSource(CFRunLoopGetCurrent(),
+							 notificationRunLoopSource,
+							 kCFRunLoopDefaultMode);
 	[self registerForUSBNotifications];
+}
+
+-(void)stopObserving {
+	if (self.ioKitNotificationPort) {
+		CFRunLoopRemoveSource(CFRunLoopGetCurrent(), self.notificationRunLoopSource, kCFRunLoopDefaultMode);
+		IONotificationPortDestroy(self.ioKitNotificationPort);
+		self.ioKitNotificationPort = NULL;
+		self.notificationRunLoopSource = NULL;
+	}
+	self.notificationsArePrimed = NO;
 }
 
 -(void)registerForUSBNotifications {
@@ -112,10 +126,7 @@ static void usbDeviceRemoved(void *refCon, io_iterator_t iterator);
 -(void)usbDeviceID:(uint64_t)deviceID name:(NSString*)deviceName added:(BOOL)added {
 	NSString *title = added ? NSLocalizedString(@"USB Connection", @"") : NSLocalizedString(@"USB Disconnection", @"");
 	
-    NSData *iconData = nil;
-    NSString *imageName = added ? @"USB-On" : @"USB-Off";
-    NSString *imagePath = [[NSBundle mainBundle] pathForResource:imageName ofType:@"tif"];
-    iconData = [NSData dataWithContentsOfFile:imagePath];
+    NSData *iconData = HWGPNGDataForSystemSymbol(@"cable.connector", added ? @"USB-On" : @"USB-Off");
 	[delegate notifyWithName:added ? @"USBConnected" : @"USBDisconnected"
 							 title:title
 					 description:deviceName

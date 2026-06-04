@@ -18,8 +18,15 @@ Icon?
 
 Release/distribution
 DerivedData
+.xcode-derived-data/
+.xcode-derived-data*/
+.xcode-module-cache/
+.xcode-test-obj/
+.xcode-test-products/
+org.llvm.clang/
 project.pbxproj.orig
 
 *.orig
+*.profraw
 
 .hg*

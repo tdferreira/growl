@@ -7,6 +7,7 @@
 //
 
 #import "HWGrowlKeyboardMonitor.h"
+#import <ApplicationServices/ApplicationServices.h>
 
 @interface HWGrowlKeyboardMonitor ()
 
@@ -21,6 +22,8 @@
 @property (nonatomic) BOOL capsFlag;
 @property (nonatomic) BOOL fnFlag;
 @property (nonatomic) BOOL shiftFlag;
+@property (nonatomic, retain) id localFlagsMonitor;
+@property (nonatomic, retain) id globalFlagsMonitor;
 
 @end
 
@@ -37,6 +40,8 @@
 @synthesize capsFlag;
 @synthesize fnFlag;
 @synthesize shiftFlag;
+@synthesize localFlagsMonitor;
+@synthesize globalFlagsMonitor;
 
 -(id)init {
 	if((self = [super init])){
@@ -73,17 +78,43 @@
 
     [shifyKeyLabel release];
     shifyKeyLabel = nil;
+	
+	[self stopObserving];
 
 	[super dealloc];
 }
 
 -(void)postRegistrationInit {
+	[self startObserving];
+}
+
+-(void)startObserving {
+	if (localFlagsMonitor || globalFlagsMonitor)
+		return;
+	
 	[self initFlags];
 	[self listen];
 }
 
+-(void)stopObserving {
+	if (localFlagsMonitor) {
+		[NSEvent removeMonitor:localFlagsMonitor];
+		[localFlagsMonitor release];
+		localFlagsMonitor = nil;
+	}
+	if (globalFlagsMonitor) {
+		[NSEvent removeMonitor:globalFlagsMonitor];
+		[globalFlagsMonitor release];
+		globalFlagsMonitor = nil;
+	}
+}
+
 -(void) listen
 {
+	NSDictionary *accessibilityOptions = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES]
+																	 forKey:(id)kAXTrustedCheckOptionPrompt];
+	if (!AXIsProcessTrustedWithOptions((CFDictionaryRef)accessibilityOptions))
+		NSLog(@"Keyboard Monitor requires Accessibility permission to observe key changes while other applications are active.");
 	
 	NSEvent* (^myHandler)(NSEvent*) = ^(NSEvent* event)
 	{
@@ -92,10 +123,10 @@
 [self sendNotification:NAME forFlag:@"" #NAME];\
 self.NAME ## Flag = NAME;
 		
-		NSUInteger flags = [NSEvent modifierFlags];
-		BOOL caps = flags & NSAlphaShiftKeyMask ? YES : NO;
-		BOOL fn = flags & NSFunctionKeyMask ? YES : NO;
-		BOOL shift = flags & NSShiftKeyMask ? YES : NO;
+		NSUInteger flags = [event modifierFlags];
+		BOOL caps = flags & NSEventModifierFlagCapsLock ? YES : NO;
+		BOOL fn = flags & NSEventModifierFlagFunction ? YES : NO;
+		BOOL shift = flags & NSEventModifierFlagShift ? YES : NO;
 		
 		CHECK_FLAG(caps);
 		CHECK_FLAG(fn);
@@ -104,10 +135,10 @@ self.NAME ## Flag = NAME;
 		return event;
 	};
 	
-	[NSEvent addLocalMonitorForEventsMatchingMask:NSFlagsChangedMask 
-													  handler:myHandler];
-	[NSEvent addGlobalMonitorForEventsMatchingMask:NSFlagsChangedMask 
-														handler: ^(NSEvent* event)
+	self.localFlagsMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskFlagsChanged
+																   handler:myHandler];
+	self.globalFlagsMonitor = [NSEvent addGlobalMonitorForEventsMatchingMask:NSEventMaskFlagsChanged
+																	 handler: ^(NSEvent* event)
 	 {
 		 myHandler(event);
 	 }];
@@ -127,19 +158,19 @@ self.NAME ## Flag = NAME;
 		enabledKey = @"capslock";
 		name = newState ? @"CapsLockOn" : @"CapsLockOff";
 		title = newState ? NSLocalizedString(@"Caps Lock On", @"") : NSLocalizedString(@"Caps Lock Off", @"");
-		identifier = @"HWGrowlCaps";
+		identifier = [NSString stringWithFormat:@"HWGrowlCaps-%@", name];
 		imageName = newState ? @"Capster-CapsLock-On" : @"Capster-CapsLock-Off";
 	}else if ([type isEqualToString:@"fn"]){
 		enabledKey = @"fnkey";
 		name = newState ? @"FNPressed" : @"FNReleased";
 		title = newState ? NSLocalizedString(@"FN Key Pressed", @"") : NSLocalizedString(@"FN Key Released", @"");
-		identifier = @"HWGrowlFNKey";
+		identifier = [NSString stringWithFormat:@"HWGrowlFNKey-%f", [NSDate timeIntervalSinceReferenceDate]];
 		imageName = newState ? @"Capster-FnKey-On" : @"Capster-FnKey-Off";
 	}else if ([type isEqualToString:@"shift"]){
 		enabledKey = @"shiftkey";
 		name = newState ? @"ShiftPressed" : @"ShiftReleased";
 		title = newState ? NSLocalizedString(@"Shift Key Pressed", @"") : NSLocalizedString(@"Shift Key Released", @"");
-		identifier = @"HWGrowlShiftKey";
+		identifier = [NSString stringWithFormat:@"HWGrowlShiftKey-%f", [NSDate timeIntervalSinceReferenceDate]];
 		imageName = newState ? @"Capster-Shift-On" : @"Capster-Shift-Off";
 	}else {
 		return;
@@ -150,8 +181,14 @@ self.NAME ## Flag = NAME;
 	if(![enabled boolValue])
 		return;
 	
-    NSString *imagePath = [[NSBundle mainBundle] pathForResource:imageName ofType:@"tif"];
-    NSData *iconData = [NSData dataWithContentsOfFile:imagePath];
+	NSString *symbolName = @"keyboard";
+	if ([type isEqualToString:@"caps"])
+		symbolName = newState ? @"capslock.fill" : @"capslock";
+	else if ([type isEqualToString:@"fn"])
+		symbolName = @"function";
+	else if ([type isEqualToString:@"shift"])
+		symbolName = newState ? @"shift.fill" : @"shift";
+    NSData *iconData = HWGPNGDataForSystemSymbol(symbolName, imageName);
     [delegate notifyWithName:name
                        title:title
                  description:nil
@@ -164,9 +201,9 @@ self.NAME ## Flag = NAME;
 -(void) initFlags
 {
 	NSUInteger flags = [NSEvent modifierFlags];
-	capsFlag = flags & NSAlphaShiftKeyMask ? YES : NO;
-	fnFlag = flags & NSFunctionKeyMask ? YES : NO;
-	shiftFlag = flags & NSShiftKeyMask ? YES : NO;
+	capsFlag = flags & NSEventModifierFlagCapsLock ? YES : NO;
+	fnFlag = flags & NSEventModifierFlagFunction ? YES : NO;
+	shiftFlag = flags & NSEventModifierFlagShift ? YES : NO;
 }
 
 #pragma mark HWGrowlPluginProtocol

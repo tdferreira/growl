@@ -7,13 +7,14 @@
 //
 
 #import "HWGrowlTimeMachineMonitor.h"
-#include <asl.h>
+#import <OSLog/OSLog.h>
 
-@interface HWGrowlTimeMachineMonitor ()
+@interface HWGrowlTimeMachineMonitor () {
+	dispatch_queue_t tmQueue;
+}
 
 @property (nonatomic, assign) id<HWGrowlPluginControllerProtocol> delegate;
 
-@property (nonatomic, assign) dispatch_queue_t tmQueue;
 @property (nonatomic, retain) NSTimer *pollTimer;
 @property (nonatomic, retain) NSDate *lastSearchTime, *lastStartTime, *lastEndTime;
 @property (nonatomic, assign) BOOL postGrowlNotifications;
@@ -25,7 +26,6 @@
 
 @synthesize delegate;
 
-@synthesize tmQueue;
 @synthesize pollTimer;
 @synthesize lastStartTime;
 @synthesize lastSearchTime;
@@ -37,13 +37,14 @@
 	if((self = [super init])){
 		parsing = NO;
 		
-		self.tmQueue = dispatch_queue_create("com.growl.hardwaregrowler.tmmonitorqueue", DISPATCH_QUEUE_SERIAL);
+		tmQueue = dispatch_queue_create("com.growl.hardwaregrowler.tmmonitorqueue", DISPATCH_QUEUE_SERIAL);
 	}
 	return self;
 }
 
 -(void)dealloc {
-	dispatch_release(tmQueue);
+	if (tmQueue)
+		dispatch_release(tmQueue);
 	[pollTimer invalidate];
 	[pollTimer release];
     pollTimer = nil;
@@ -65,10 +66,12 @@
 	static NSData *data = nil;
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
-		NSString *path = [[NSWorkspace sharedWorkspace] fullPathForApplication:@"Time Machine"];
-		NSImage *appIcon = path ? [[NSWorkspace sharedWorkspace] iconForFile:path] : nil;
-		data = [[[appIcon representations] objectAtIndex:0U] representationUsingType: NSPNGFileType
-    properties: nil];
+		NSURL *appURL = [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:@"com.apple.backup.launcher"];
+		NSImage *appIcon = appURL ? [[NSWorkspace sharedWorkspace] iconForFile:[appURL path]] : nil;
+		NSData *tiffData = [appIcon TIFFRepresentation];
+		NSBitmapImageRep *imageRep = tiffData ? [NSBitmapImageRep imageRepWithData:tiffData] : nil;
+		data = [[imageRep representationUsingType:NSBitmapImageFileTypePNG
+									   properties:[NSDictionary dictionary]] retain];
 	});
 	return data;
 }
@@ -94,16 +97,6 @@
 	
 	[pollTimer invalidate];
 	self.pollTimer = nil;
-}
-
-- (NSDate *) dateFromASLMessage:(aslmsg)msg {
-	NSTimeInterval unixTime = strtod(asl_get(msg, ASL_KEY_TIME), NULL);
-	const char *nanosecondsUTF8 = asl_get(msg, ASL_KEY_TIME_NSEC);
-	if (nanosecondsUTF8) {
-		NSTimeInterval unixTimeNanoseconds = strtod(nanosecondsUTF8, NULL);
-		unixTime += (unixTimeNanoseconds / 1.0e9);
-	}
-	return [NSDate dateWithTimeIntervalSince1970:unixTime];
 }
 
 - (NSString *) stringWithTimeInterval:(NSTimeInterval)units {
@@ -134,8 +127,7 @@
 		else
 			description = NSLocalizedString(@"First backup, or no previous backup found in the system log", @"");
         
-        NSString *iconPath = [[NSBundle mainBundle] resourceNamed:@"TimeMachine-On" ofType:@"tif"];
-        NSData *iconData = [NSData dataWithContentsOfFile:iconPath];
+        NSData *iconData = HWGPNGDataForSystemSymbol(@"clock.arrow.circlepath", @"TimeMachine-On");
 		[blockSelf->delegate notifyWithName:@"TimeMachineStart"
 												title:NSLocalizedString(@"Time Machine started", @"") 
 										description:description
@@ -164,32 +156,53 @@
 - (void) parseLogDatabase {
 	__block HWGrowlTimeMachineMonitor *blockSelf = self;
 	
-	aslmsg query = asl_new(ASL_TYPE_QUERY);
-	const char *backupd_sender = "com.apple.backupd";
-	asl_set_query(query, ASL_KEY_SENDER, backupd_sender, ASL_QUERY_OP_EQUAL);
-	if (lastSearchTime) {
-		char *lastSearchTimeUTF8 = NULL;
-		asprintf(&lastSearchTimeUTF8, "%lu", (unsigned long)[lastSearchTime timeIntervalSince1970]);
-		if(lastSearchTimeUTF8 != NULL){
-			asl_set_query(query, ASL_KEY_TIME, lastSearchTimeUTF8, ASL_QUERY_OP_GREATER);
-			free(lastSearchTimeUTF8);
-		}
+	NSError *storeError = nil;
+	OSLogStore *store = [OSLogStore storeWithScope:OSLogStoreSystem error:&storeError];
+	if (!store) {
+		NSLog(@"Unable to open system log store for Time Machine monitor: %@", storeError);
+		postGrowlNotifications = YES;
+		dispatch_async(dispatch_get_main_queue(), ^{
+			[blockSelf setParsing:NO];
+		});
+		return;
 	}
-	aslresponse response = asl_search(NULL, query);
+	
+	NSDate *searchDate = lastSearchTime ? lastSearchTime : [NSDate dateWithTimeIntervalSinceNow:-3600.0];
+	OSLogPosition *position = [store positionWithDate:searchDate];
+	NSError *enumeratorError = nil;
+	OSLogEnumerator *enumerator = [store entriesEnumeratorWithOptions:0
+															 position:position
+															predicate:nil
+																error:&enumeratorError];
+	if (!enumerator) {
+		NSLog(@"Unable to enumerate system log for Time Machine monitor: %@", enumeratorError);
+		postGrowlNotifications = YES;
+		dispatch_async(dispatch_get_main_queue(), ^{
+			[blockSelf setParsing:NO];
+		});
+		return;
+	}
 	
 	BOOL lastWasCanceled = NO;
 	
 	NSUInteger numFoundMessages = 0UL;
 	NSDate *lastFoundMessageDate = nil;
-	if(response != NULL){
-		aslmsg msg;
-		while ((msg = aslresponse_next(response))) {
-			++numFoundMessages;
-			lastFoundMessageDate = [self dateFromASLMessage:msg];
-			
-			const char *msgUTF8 = asl_get(msg, ASL_KEY_MSG);
-			NSString *message = [NSString stringWithUTF8String:msgUTF8];
-			if ([message compare:@"Starting standard backup"] == NSOrderedSame) {
+	NSDate *pollEndDate = [NSDate date];
+	OSLogEntry *entry = nil;
+	while ((entry = [enumerator nextObject])) {
+		NSDate *messageDate = [entry date];
+		if (lastSearchTime && [messageDate compare:lastSearchTime] != NSOrderedDescending)
+			continue;
+		
+		NSString *message = [entry composedMessage];
+		NSString *eventName = [self timeMachineEventNameForLogMessage:message];
+		if (!eventName)
+			continue;
+		
+		++numFoundMessages;
+		lastFoundMessageDate = messageDate;
+		
+		if ([eventName isEqualToString:@"start"]) {
 				self.lastStartTime = lastFoundMessageDate;
 				lastWasCanceled = NO;
 				
@@ -197,15 +210,14 @@
 					[self postBackupStartedNotification];
 				}
 				
-			} else if ([message compare:@"Backup completed successfully."] == NSOrderedSame) {
+		} else if ([eventName isEqualToString:@"finish"]) {
 				self.lastEndTime = lastFoundMessageDate;
 				lastWasCanceled = NO;
 				
 				if (postGrowlNotifications) {
 					dispatch_async(dispatch_get_main_queue(), ^{
 						NSString *timeString = [blockSelf stringWithTimeInterval:[blockSelf->lastEndTime timeIntervalSinceDate:blockSelf->lastStartTime]];
-                        NSString *iconPath = [[NSBundle mainBundle] resourceNamed:@"TimeMachine-Off" ofType:@"tif"];
-                        NSData *iconData = [NSData dataWithContentsOfFile:iconPath];
+                        NSData *iconData = HWGPNGDataForSystemSymbol(@"clock.badge.checkmark", @"TimeMachine-Off");
                         [blockSelf->delegate notifyWithName:@"TimeMachineFinish"
 																title:NSLocalizedString(@"Time Machine finished", @"")
 														description:[NSString stringWithFormat:NSLocalizedString(@"Back-up took %@", @""), timeString]
@@ -216,13 +228,10 @@
 					});
 				}
 				
-			} 
-			else if ([message compare:@"Backup canceled."] == NSOrderedSame || 
-						[message compare:@"Backup failed"] == NSOrderedSame) 
-			{
+		} else if ([eventName isEqualToString:@"canceled"] || [eventName isEqualToString:@"failed"]) {
 				NSDate *date = lastFoundMessageDate;
 				lastWasCanceled = YES;
-				BOOL wasFailure = ([message compare:@"Backup failed"] == NSOrderedSame);
+				BOOL wasFailure = [eventName isEqualToString:@"failed"];
 				
 				if (postGrowlNotifications) {
 					dispatch_async(dispatch_get_main_queue(), ^{
@@ -232,8 +241,7 @@
 							description = [NSString stringWithFormat:NSLocalizedString(@"Failed after %@", @""), timeString];
 						else
 							description = [NSString stringWithFormat:NSLocalizedString(@"Canceled after %@", @""), timeString];
-                        NSString *iconPath = [[NSBundle mainBundle] resourceNamed:@"TimeMachine-Failed" ofType:@"tif"];
-                        NSData *iconData = [NSData dataWithContentsOfFile:iconPath];
+                        NSData *iconData = HWGPNGDataForSystemSymbol(wasFailure ? @"clock.badge.exclamationmark" : @"clock.badge.xmark", @"TimeMachine-Failed");
 
 						[blockSelf->delegate notifyWithName:wasFailure ? @"TimeMachineFailed" : @"TimeMachineCanceled"
 																title:wasFailure ? NSLocalizedString(@"Time Machine Failed", @"") : NSLocalizedString(@"Time Machine Canceled", @"")
@@ -244,12 +252,8 @@
 															  plugin:blockSelf];
 					});
 				}
-			} 
 		}
-		aslresponse_free(response);
 	}
-	if(query)
-		asl_free(query);
 	
 	//If a Time Machine back-up is running now, post the notification even if we are on our first run.
 	if (numFoundMessages > 0 &&
@@ -262,12 +266,31 @@
 	
 	if (numFoundMessages > 0) {
 		self.lastSearchTime = lastFoundMessageDate;
+	} else {
+		self.lastSearchTime = pollEndDate;
 	}
 	postGrowlNotifications = YES;
 	
 	dispatch_async(dispatch_get_main_queue(), ^{
 		[blockSelf setParsing:NO]; 
 	});
+}
+
+- (NSString *)timeMachineEventNameForLogMessage:(NSString *)message
+{
+	if (![message length])
+		return nil;
+	
+	if ([message rangeOfString:@"Starting standard backup"].location != NSNotFound)
+		return @"start";
+	if ([message rangeOfString:@"Backup completed successfully"].location != NSNotFound)
+		return @"finish";
+	if ([message rangeOfString:@"Backup canceled"].location != NSNotFound)
+		return @"canceled";
+	if ([message rangeOfString:@"Backup failed"].location != NSNotFound)
+		return @"failed";
+	
+	return nil;
 }
 
 #pragma mark HWGrowlPluginProtocol

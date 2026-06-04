@@ -29,8 +29,7 @@
 @synthesize phone;
 
 -(void)dealloc {
-	[connectionNotification unregister];
-	connectionNotification = nil;
+	[self stopObserving];
     
     [phone release];
     phone = nil;
@@ -38,53 +37,29 @@
 	[super dealloc];
 }
 
-#ifndef NSFoundationVersionNumber10_7
-#define NSFoundationVersionNumber10_7   833.1
-#endif
-#ifndef NSFoundationVersionNumber10_7_3
-#define NSFoundationVersionNumber10_7_3 833.24
-#endif
 -(id)init {
-	if((BOOL)isless(NSFoundationVersionNumber, NSFoundationVersionNumber10_7_3))
-	{
-		NSLog(@"Phone Module does not work on 10.7-10.7.2, please upgrade to 10.7.3");
-		if(![[NSUserDefaults standardUserDefaults] boolForKey:@"SuppressPhoneModuleWarn"]){
-			NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Phone Module requires OSX Lion 10.7.3 or above", @"")
-														defaultButton:NSLocalizedString(@"Ok", @"") 
-													 alternateButton:nil
-														  otherButton:nil
-										informativeTextWithFormat:NSLocalizedString(@"In order to receive notifications about Phone Devices, please upgrade to OSX Lion 10.7.3 or above", @"")];
-			alert.showsSuppressionButton = YES;
-			[[alert suppressionButton] bind:NSValueBinding
-										  toObject:[NSUserDefaultsController sharedUserDefaultsController]
-									  withKeyPath:@"values.SuppressPhoneModuleWarn"
-											options:nil];
-			[alert runModal];
-		}
-		[self release];
-		return nil;
-	}
-	
-	if((self = [super init])){
-		NSString *path = [[NSBundle mainBundle] pathForResource:@"HandsFreeDeviceSDPRecord" ofType:@"plist"];
-		NSDictionary *serviceDict = [NSDictionary dictionaryWithContentsOfFile:path]; 
-		if(serviceDict){
-			IOReturn result = IOBluetoothAddServiceDict((CFDictionaryRef)serviceDict, NULL);
-			if(result != kIOReturnSuccess){
-				NSLog(@"Error 0x%x", result);
-			}
-		}else{
-			NSLog(@"couldnt read");
-		}
-	}
-	return self;
+	return [super init];
 }
 
 -(void)postRegistrationInit {
+	[self startObserving];
+}
+
+-(void)startObserving {
+	if (self.connectionNotification)
+		return;
+	
 	self.starting = YES;
 	self.connectionNotification = [IOBluetoothDevice registerForConnectNotifications:self 
 																									selector:@selector(bluetoothConnection:device:)];
 	self.starting = NO;
+}
+
+-(void)stopObserving {
+	[connectionNotification unregister];
+	connectionNotification = nil;
+	self.starting = NO;
+	self.phone = nil;
 }
 
 -(void)bluetoothDisconnection:(IOBluetoothUserNotification*)note 
@@ -98,6 +73,13 @@
 /* UNDOCUMETED DELEGATE CALL */
 -(void)handsFree:(IOBluetoothDevice*)device incomingCallFrom:(NSString*)number {
 	NSLog(@"Call %@", number);
+	[delegate notifyWithName:@"IncomingPhoneCall"
+					 title:NSLocalizedString(@"Incoming Phone Call", @"")
+			   description:number ?: NSLocalizedString(@"Unknown caller", @"")
+					  icon:HWGPNGDataForSystemSymbol(@"phone", nil)
+		  identifierString:@"HWGrowlIncomingPhoneCall"
+			 contextString:nil
+					plugin:self];
 	[(IOBluetoothHandsFreeDevice*)device acceptCall];
 }
 
@@ -111,6 +93,14 @@
 		incomingSMS:(NSDictionary *)sms
 {
 	NSLog(@"SMS %@", sms);
+	NSString *description = [sms description];
+	[delegate notifyWithName:@"IncomingSMS"
+					 title:NSLocalizedString(@"Incoming SMS", @"")
+			   description:description ?: @""
+					  icon:HWGPNGDataForSystemSymbol(@"message", nil)
+		  identifierString:@"HWGrowlIncomingSMS"
+			 contextString:nil
+					plugin:self];
 }
 
 - (void)handsFree:(IOBluetoothHandsFree *)device connected:(NSNumber *)status {
@@ -140,7 +130,7 @@
 		if (result != kIOReturnSuccess)
 		{
 			NSLog(@"error 0x%x, trying removing and readding", result);
-			result = IOBluetoothRemoveSCOAudioDevice((IOBluetoothDeviceRef)device);
+			result = IOBluetoothRemoveSCOAudioDevice([device getDeviceRef]);
 			NSLog(@"remove result 0x%x", result);
 			result = IOBluetoothAddSCOAudioDevice([device getDeviceRef], (CFDictionaryRef)scoDict);
 			if (result != kIOReturnSuccess)
@@ -179,7 +169,7 @@
 	return delegate;
 }
 -(NSString*)pluginDisplayName{
-	return NSLocalizedString(@"Phone Module", @"");
+	return NSLocalizedString(@"Phone Monitor", @"");
 }
 -(NSImage*)preferenceIcon {
 	static NSImage *_icon = nil;
@@ -191,6 +181,10 @@
 }
 -(NSView*)preferencePane {
 	return nil;
+}
+
+-(BOOL)enabledByDefault {
+	return NO;
 }
 
 -(void)fireOnLaunchNotes {

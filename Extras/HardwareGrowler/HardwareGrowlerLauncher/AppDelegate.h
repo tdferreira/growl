@@ -6,7 +6,8 @@
 //  Copyright (c) 2012 The Growl Project, LLC. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
+#import <AppKit/AppKit.h>
+#import <Foundation/Foundation.h>
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 

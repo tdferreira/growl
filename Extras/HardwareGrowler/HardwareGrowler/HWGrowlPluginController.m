@@ -16,6 +16,10 @@
 
 @property (nonatomic, retain) NSMutableArray *notifiers;
 @property (nonatomic, retain) NSMutableArray *monitors;
+@property (nonatomic, retain) HWNotificationAdapter *notificationAdapter;
+
+- (void)startEnabledPlugins;
+- (void)startPlugin:(id)plugin;
 
 @end
 
@@ -24,23 +28,28 @@
 @synthesize plugins;
 @synthesize notifiers;
 @synthesize monitors;
+@synthesize notificationAdapter;
 
 -(void)dealloc {
 	[plugins release];
+	[notifiers release];
+	[monitors release];
+	[notificationAdapter release];
 	[super dealloc];
 }
 
 -(id)init {
 	if((self = [super init])){
-		self.plugins = [NSMutableArray array];
-		self.notifiers = [NSMutableArray array];
-		self.monitors = [NSMutableArray array];
-		[self loadPlugins];
-		
-		[GrowlApplicationBridge setGrowlDelegate:self];
-		[GrowlApplicationBridge setShouldUseBuiltInNotifications:YES];
-		
-		[self postRegistrationInit];
+			self.plugins = [NSMutableArray array];
+			self.notifiers = [NSMutableArray array];
+			self.monitors = [NSMutableArray array];
+			[self loadPlugins];
+			
+			self.notificationAdapter = [[[HWNotificationAdapter alloc] init] autorelease];
+			self.notificationAdapter.delegate = self;
+			[self.notificationAdapter requestAuthorization];
+			
+			[self startEnabledPlugins];
 		
 		if([self onLaunchEnabled])
 			[self fireOnLaunchNotes];
@@ -99,16 +108,24 @@
 	}];
 }
 			
--(void)postRegistrationInit {
+-(void)startEnabledPlugins {
 	[plugins enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-		if([[obj objectForKey:@"plugin"] respondsToSelector:@selector(postRegistrationInit)])
-			[[obj objectForKey:@"plugin"] postRegistrationInit];
+		if(![[obj objectForKey:@"disabled"] boolValue])
+			[self startPlugin:[obj objectForKey:@"plugin"]];
 	}];
+}
+
+- (void)startPlugin:(id)plugin
+{
+	if([plugin respondsToSelector:@selector(startObserving)])
+		[plugin startObserving];
+	else if([plugin respondsToSelector:@selector(postRegistrationInit)])
+		[plugin postRegistrationInit];
 }
 
 -(void)fireOnLaunchNotes {
 	[notifiers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-		if([obj respondsToSelector:@selector(fireOnLaunchNotes)])
+		if(![self pluginDisabled:obj] && [obj respondsToSelector:@selector(fireOnLaunchNotes)])
 			[obj fireOnLaunchNotes];
 	}];
 }
@@ -132,22 +149,13 @@
 	if(disabled)
 		return;
 	
-	NSString *contextCombined = nil;
-	if(context && [context rangeOfString:@" : "].location != NSNotFound) {
-		NSLog(@"found \" : \" in context string %@", context);
-	}
-	if(context && plugin && [context rangeOfString:@" : "].location == NSNotFound) {
-		contextCombined = [NSString stringWithFormat:@"%@ : %@", NSStringFromClass([plugin class]), context];
-	}
-	
-    [GrowlApplicationBridge	notifyWithTitle:title
-										 description:description
-								  notificationName:name 
-											 iconData:iconData
-											 priority:0
-											 isSticky:NO
-										clickContext:contextCombined
-										  identifier:identifier];
+	[notificationAdapter notifyWithName:name
+								  title:title
+							description:description
+								   icon:iconData
+					   identifierString:identifier
+						  contextString:context
+								 plugin:plugin];
 }
 
 -(BOOL)onLaunchEnabled {
@@ -166,56 +174,21 @@
 	return disabled;
 }
 
--(void)growlNotificationClosed:(id)clickContext viaClick:(BOOL)click {
-	NSArray *components = [clickContext componentsSeparatedByString:@" : "];
-	if([components count] < 2)
+- (void)notificationAdapter:(HWNotificationAdapter *)adapter
+didCloseNotificationForPluginClassName:(NSString *)pluginClassName
+                   context:(NSString *)context
+                   byClick:(BOOL)click
+{
+	if(!pluginClassName || !context)
 		return;
-	NSString *classString = [components objectAtIndex:0];
-	NSString *context = [components objectAtIndex:1];
 	
 	[notifiers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-		if([obj isKindOfClass:NSClassFromString(classString)]){
+		if([NSStringFromClass([obj class]) isEqualToString:pluginClassName]){
 			if([obj respondsToSelector:@selector(noteClosed:byClick:)])
 				[obj noteClosed:context byClick:click];
 			*stop = YES;
 		}
 	}];
-}
-
-#pragma mark GrowlApplicationBridgeDelegate methods
-
-- (NSDictionary*)registrationDictionaryForGrowl {
-	NSMutableArray *allNotes = [NSMutableArray array];
-	NSMutableArray *defaultNotes = [NSMutableArray array];
-	NSMutableDictionary *descriptions = [NSMutableDictionary dictionary];
-	NSMutableDictionary *localizedNames = [NSMutableDictionary dictionary];
-	
-	[notifiers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-		id<HWGrowlPluginNotifierProtocol> notifier = obj;
-		[allNotes addObjectsFromArray:[notifier noteNames]];
-		if([notifier defaultNotifications])
-			[defaultNotes addObjectsFromArray:[notifier defaultNotifications]];
-		[descriptions addEntriesFromDictionary:[notifier noteDescriptions]];
-		[localizedNames addEntriesFromDictionary:[notifier localizedNames]];
-	}];
-	
-	NSDictionary *regDict = [NSDictionary dictionaryWithObjectsAndKeys:allNotes, GROWL_NOTIFICATIONS_ALL,
-									 defaultNotes, GROWL_NOTIFICATIONS_DEFAULT,
-									 descriptions, GROWL_NOTIFICATIONS_DESCRIPTIONS,
-									 localizedNames, GROWL_NOTIFICATIONS_HUMAN_READABLE_NAMES, nil];
-	return regDict;
-}
-
-- (NSString *) applicationNameForGrowl {
-	return @"HardwareGrowler";
-}
-
--(void)growlNotificationTimedOut:(id)clickContext {
-	[self growlNotificationClosed:clickContext viaClick:NO];
-}
-
--(void)growlNotificationWasClicked:(id)clickContext {
-	[self growlNotificationClosed:clickContext viaClick:YES];
 }
 
 @end

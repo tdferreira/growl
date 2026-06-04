@@ -29,27 +29,42 @@
 -(id)init {
 	if((self = [super init])){
 		self.notificationsArePrimed = NO;
-		//#warning	kIOMasterPortDefault is only available on 10.2 and above...
-		self.ioKitNotificationPort = IONotificationPortCreate(kIOMasterPortDefault);
-		self.notificationRunLoopSource = IONotificationPortGetRunLoopSource(ioKitNotificationPort);
-		
-		CFRunLoopAddSource(CFRunLoopGetCurrent(),
-								 notificationRunLoopSource,
-								 kCFRunLoopDefaultMode);
 	}
 	return self;
 }
 
 -(void)dealloc {
-	if (ioKitNotificationPort) {
-		CFRunLoopRemoveSource(CFRunLoopGetCurrent(), notificationRunLoopSource, kCFRunLoopDefaultMode);
-		IONotificationPortDestroy(ioKitNotificationPort);
-	}
+	[self stopObserving];
 	[super dealloc];
 }
 
 -(void)postRegistrationInit {
+	[self startObserving];
+}
+
+-(void)startObserving {
+	if (ioKitNotificationPort) {
+		return;
+	}
+	
+	self.notificationsArePrimed = NO;
+	self.ioKitNotificationPort = IONotificationPortCreate(kIOMasterPortDefault);
+	self.notificationRunLoopSource = IONotificationPortGetRunLoopSource(ioKitNotificationPort);
+	
+	CFRunLoopAddSource(CFRunLoopGetCurrent(),
+							 notificationRunLoopSource,
+							 kCFRunLoopDefaultMode);
 	[self registerForFireWireNotifications];
+}
+
+-(void)stopObserving {
+	if (ioKitNotificationPort) {
+		CFRunLoopRemoveSource(CFRunLoopGetCurrent(), notificationRunLoopSource, kCFRunLoopDefaultMode);
+		IONotificationPortDestroy(ioKitNotificationPort);
+		self.ioKitNotificationPort = NULL;
+		self.notificationRunLoopSource = NULL;
+	}
+	self.notificationsArePrimed = NO;
 }
 
 -(NSString*)nameForFireWireObject:(io_object_t)thisObject {
@@ -96,9 +111,7 @@
 -(void)fwDeviceName:(NSString*)deviceName added:(BOOL)added {
 	NSString *title = added ? NSLocalizedString(@"Firewire Connection", @"") : NSLocalizedString(@"Firewire Disconnection", @"");
 	
-    NSString *imageName = (added ? @"Firewire-On" : @"Firewire-Off");
-    NSString *imagePath = [[NSBundle mainBundle] pathForResource:imageName ofType:@"tif"];
-    NSData *iconData = [NSData dataWithContentsOfFile:imagePath];
+    NSData *iconData = HWGPNGDataForSystemSymbol(@"cable.connector", added ? @"Firewire-On" : @"Firewire-Off");
     
 	[delegate notifyWithName:added ? @"FirewireConnected" : @"FirewireDisconnected"
 							 title:title

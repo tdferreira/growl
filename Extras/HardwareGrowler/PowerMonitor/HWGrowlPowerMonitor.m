@@ -11,6 +11,8 @@
 #include <IOKit/ps/IOPSKeys.h>
 #include <IOKit/ps/IOPowerSources.h>
 
+static NSString * const HWGBatterySettingsURLString = @"x-apple.systempreferences:com.apple.Battery-Settings.extension";
+
 @interface HWGrowlPowerMonitor ()
 
 +(NSInteger)batteryPercentageForPowerSourceDescription:(CFDictionaryRef)description;
@@ -188,10 +190,6 @@
 
 -(id)init {
 	if((self = [super init])){
-		self.notificationRunLoopSource = IOPSNotificationCreateRunLoopSource(powerSourceChanged, self);
-		
-		if (notificationRunLoopSource)
-			CFRunLoopAddSource(CFRunLoopGetCurrent(), notificationRunLoopSource, kCFRunLoopDefaultMode);
 		lastPowerSource = HGUnknownPower;
 		lastKnownTime = kIOPSTimeRemainingUnknown;
 		lastWarnState = NO;
@@ -205,10 +203,7 @@
 }
 
 -(void)dealloc {
-	CFRunLoopRemoveSource(CFRunLoopGetCurrent(), notificationRunLoopSource, kCFRunLoopDefaultMode);
-	CFRelease(notificationRunLoopSource);
-	[refireTimer invalidate];
-	[refireTimer release];
+	[self stopObserving];
 	
 	[_refireBatteryStatusLabel release];
     _refireBatteryStatusLabel = nil;
@@ -223,6 +218,27 @@
 	_refireOnlyOnBatteryLabel = nil;
     
 	[super dealloc];
+}
+
+-(void)startObserving {
+	if (notificationRunLoopSource)
+		return;
+	
+	self.notificationRunLoopSource = IOPSNotificationCreateRunLoopSource(powerSourceChanged, self);
+	if (notificationRunLoopSource)
+		CFRunLoopAddSource(CFRunLoopGetCurrent(), notificationRunLoopSource, kCFRunLoopDefaultMode);
+	[self checkTimer];
+}
+
+-(void)stopObserving {
+	if (notificationRunLoopSource) {
+		CFRunLoopRemoveSource(CFRunLoopGetCurrent(), notificationRunLoopSource, kCFRunLoopDefaultMode);
+		CFRelease(notificationRunLoopSource);
+		notificationRunLoopSource = NULL;
+	}
+	[refireTimer invalidate];
+	[refireTimer release];
+	refireTimer = nil;
 }
 
 -(void)fireOnLaunchNotes {
@@ -446,15 +462,27 @@
 			
 			@autoreleasepool
 			{
-				NSString *imagePath = [[NSBundle mainBundle] pathForResource:imageName ofType:@"tif"];
-            NSData *iconData = [NSData dataWithContentsOfFile:imagePath];
+				NSString *symbolName = @"battery.100";
+				if (warnBattery)
+					symbolName = @"battery.25";
+				else if (currentSource == HGACPower)
+					symbolName = chargingOrFinishing ? @"battery.100.bolt" : @"powerplug";
+				else if (percentage <= 10)
+					symbolName = @"battery.0";
+				else if (percentage <= 25)
+					symbolName = @"battery.25";
+				else if (percentage <= 50)
+					symbolName = @"battery.50";
+				else if (percentage <= 75)
+					symbolName = @"battery.75";
+            NSData *iconData = HWGPNGDataForSystemSymbol(symbolName, imageName);
             
             [delegate notifyWithName:name
                                title:title
 								 description:description
                                 icon:iconData
                     identifierString:name
-                       contextString:nil
+                       contextString:HWGBatterySettingsURLString
                               plugin:self];
 			}
 			lastPowerSource = currentSource;
@@ -568,6 +596,18 @@ static void powerSourceChanged(void *context) {
 }
 -(NSArray*)defaultNotifications {
 	return [NSArray arrayWithObjects:@"PowerChange", @"PowerWarning", nil];
+}
+
+-(void)noteClosed:(NSString*)contextString byClick:(BOOL)clicked {
+	if(clicked && [contextString length]) {
+		NSURL *settingsURL = [NSURL URLWithString:contextString];
+		dispatch_async(dispatch_get_main_queue(), ^{
+			if (![[NSWorkspace sharedWorkspace] openURL:settingsURL]) {
+				NSURL *fallbackURL = [NSURL URLWithString:@"x-apple.systempreferences:com.apple.preference.battery"];
+				[[NSWorkspace sharedWorkspace] openURL:fallbackURL];
+			}
+		});
+	}
 }
 
 @end

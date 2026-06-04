@@ -15,14 +15,18 @@
    NSArray *growlInstances = [NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.growl.hardwaregrowler"];
    if(!growlInstances.count)
    {
-      NSURL* appURL = [[[[NSBundle mainBundle] bundleURL] URLByAppendingPathComponent:@"../../../../Contents/MacOS/HardwareGrowler" isDirectory:NO] URLByResolvingSymlinksInPath];
+      NSURL* appURL = [[[[NSBundle mainBundle] bundleURL] URLByAppendingPathComponent:@"../../../.." isDirectory:YES] URLByResolvingSymlinksInPath];
       NSLog(@"Launching HardwareGrowler at URL: %@", appURL);
-      NSDictionary* conf = [NSDictionary dictionary];
-      NSError* error = nil;
-      [[NSWorkspace sharedWorkspace] launchApplicationAtURL:appURL options:NSWorkspaceLaunchDefault configuration:conf error:&error];
-      if (error) {
-         NSLog(@"%@", error);
-      }
+      NSWorkspaceOpenConfiguration *configuration = [NSWorkspaceOpenConfiguration configuration];
+      [configuration setArguments:[NSArray arrayWithObject:@"--hardwaregrowler-login-helper"]];
+      [[NSWorkspace sharedWorkspace] openApplicationAtURL:appURL
+                                            configuration:configuration
+                                        completionHandler:^(NSRunningApplication *app, NSError *error) {
+         if (error)
+            NSLog(@"%@", error);
+         [NSApp terminate:nil];
+      }];
+      return;
    }
 	[NSApp terminate:nil];
 }

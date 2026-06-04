@@ -29,27 +29,42 @@
 -(id)init {
 	if((self = [super init])){
 		self.notificationsArePrimed = NO;
-		//#warning	kIOMasterPortDefault is only available on 10.2 and above...
-		self.ioKitNotificationPort = IONotificationPortCreate(kIOMasterPortDefault);
-		self.notificationRunLoopSource = IONotificationPortGetRunLoopSource(ioKitNotificationPort);
-		
-		CFRunLoopAddSource(CFRunLoopGetCurrent(),
-								 notificationRunLoopSource,
-								 kCFRunLoopDefaultMode);
 	}
 	return self;
 }
 
 -(void)dealloc {
-	if (ioKitNotificationPort) {
-		CFRunLoopRemoveSource(CFRunLoopGetCurrent(), notificationRunLoopSource, kCFRunLoopDefaultMode);
-		IONotificationPortDestroy(ioKitNotificationPort);
-	}
+	[self stopObserving];
 	[super dealloc];
 }
 
 -(void)postRegistrationInit {
+	[self startObserving];
+}
+
+-(void)startObserving {
+	if (ioKitNotificationPort) {
+		return;
+	}
+	
+	self.notificationsArePrimed = NO;
+	self.ioKitNotificationPort = IONotificationPortCreate(kIOMasterPortDefault);
+	self.notificationRunLoopSource = IONotificationPortGetRunLoopSource(ioKitNotificationPort);
+	
+	CFRunLoopAddSource(CFRunLoopGetCurrent(),
+							 notificationRunLoopSource,
+							 kCFRunLoopDefaultMode);
 	[self registerForThunderboltNotifications];
+}
+
+-(void)stopObserving {
+	if (ioKitNotificationPort) {
+		CFRunLoopRemoveSource(CFRunLoopGetCurrent(), notificationRunLoopSource, kCFRunLoopDefaultMode);
+		IONotificationPortDestroy(ioKitNotificationPort);
+		self.ioKitNotificationPort = NULL;
+		self.notificationRunLoopSource = NULL;
+	}
+	self.notificationsArePrimed = NO;
 }
 
 -(NSString*)nameForThunderboltObject:(io_object_t)thisObject {
@@ -79,7 +94,7 @@
 	[delegate notifyWithName:added ? @"ThunderboltConnected" : @"ThunderboltDisconnected"
 							 title:title
 					 description:deviceName
-							  icon:nil
+							  icon:HWGPNGDataForSystemSymbol(@"bolt.horizontal", added ? @"Thunderbolt-On" : @"Thunderbolt-Off")
 			  identifierString:deviceName
 				  contextString:nil
 							plugin:self];

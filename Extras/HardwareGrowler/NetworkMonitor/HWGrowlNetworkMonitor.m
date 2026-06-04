@@ -7,7 +7,10 @@
 //
 
 #import "HWGrowlNetworkMonitor.h"
+#import "HWNetworkMonitorUtilities.h"
 #import "GrowlNetworkUtilities.h"
+#import <CoreLocation/CoreLocation.h>
+#import <CoreWLAN/CoreWLAN.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 
 #include <sys/socket.h>
@@ -71,7 +74,7 @@ typedef enum {
 
 @end
 
-@interface HWGrowlNetworkMonitor ()
+@interface HWGrowlNetworkMonitor () <CLLocationManagerDelegate, CWEventDelegate>
 
 @property (nonatomic, assign) id<HWGrowlPluginControllerProtocol> delegate;
 
@@ -80,6 +83,31 @@ typedef enum {
 
 @property (nonatomic, retain) NSMutableDictionary *networkInterfaceStates;
 @property (nonatomic, retain) NSString *previousIPCombined;
+@property (nonatomic, retain) CLLocationManager *locationManager;
+@property (nonatomic, retain) CWWiFiClient *wifiClient;
+@property (nonatomic, retain) NSString *previousWiFiSignature;
+@property (nonatomic, retain) NSMutableDictionary *vpnInterfaceActiveStates;
+@property (nonatomic, retain) NSMutableDictionary *vpnServiceInterfaces;
+@property (nonatomic, retain) NSMutableDictionary *vpnServiceProtocolActiveStates;
+
+- (NSString *)networkNameFromAirPortStatus:(NSDictionary *)status interface:(NSString *)interfaceName;
+- (NSString *)stringFromSSIDValue:(id)ssidValue;
+- (NSString *)stringFromBSSIDValue:(id)bssidValue;
+- (NSString *)currentWiFiSSIDForInterface:(NSString *)interfaceName;
+- (NSString *)currentWiFiBSSIDForInterface:(NSString *)interfaceName;
+- (CWInterface *)wiFiInterfaceForName:(NSString *)interfaceName;
+- (NSString *)ssidForWiFiInterface:(CWInterface *)wifiInterface;
+- (void)startMonitoringWiFiEvents;
+- (void)stopMonitoringWiFiEvents;
+- (void)startMonitoringWiFiEvent:(CWEventType)eventType;
+- (void)notifyAirportConnectedForInterface:(NSString *)interfaceName status:(NSDictionary *)status bssid:(id)bssidValue retryCount:(NSUInteger)retryCount;
+- (void)notifyCurrentWiFiNetworkForInterface:(NSString *)interfaceName retryCount:(NSUInteger)retryCount;
+- (void)logUnavailableWiFiSSIDForInterface:(NSString *)interfaceName status:(NSDictionary *)status;
+- (void)notifyCurrentWiFiNetworkAfterLocationAuthorization;
+- (BOOL)locationAuthorizationAllowsWiFiInfo:(CLAuthorizationStatus)authorizationStatus;
+- (void)requestLocationAuthorizationIfNeeded;
+- (void)updateVPNInterface:(NSString *)interfaceName active:(BOOL)active;
+- (void)updateVPNServiceWithKey:(NSString *)key status:(NSDictionary *)status;
 
 @end
 
@@ -90,29 +118,53 @@ typedef enum {
 @synthesize dynStore;
 @synthesize networkInterfaceStates;
 @synthesize previousIPCombined;
+@synthesize locationManager;
+@synthesize wifiClient;
+@synthesize previousWiFiSignature;
+@synthesize vpnInterfaceActiveStates;
+@synthesize vpnServiceInterfaces;
+@synthesize vpnServiceProtocolActiveStates;
 
 -(id)init {
 	if((self = [super init])){
 		self.previousIPCombined = nil;
 		self.networkInterfaceStates = [NSMutableDictionary dictionary];
-        
-		[self startObserving];
+		self.vpnInterfaceActiveStates = [NSMutableDictionary dictionary];
+		self.vpnServiceInterfaces = [NSMutableDictionary dictionary];
+		self.vpnServiceProtocolActiveStates = [NSMutableDictionary dictionary];
 	}
 	return self;
 }
 
 -(void)dealloc {
-	if (rlSrc)
-		CFRunLoopRemoveSource(CFRunLoopGetMain(), rlSrc, kCFRunLoopDefaultMode);
-   if (dynStore)
-		CFRelease(dynStore);
+	[self stopObserving];
 	
 	[networkInterfaceStates release];
     networkInterfaceStates = nil;
     
     [previousIPCombined release];
     previousIPCombined = nil;
-    
+	
+	[locationManager setDelegate:nil];
+		[locationManager release];
+		locationManager = nil;
+		
+		[self stopMonitoringWiFiEvents];
+		[wifiClient release];
+		wifiClient = nil;
+		
+		[previousWiFiSignature release];
+		previousWiFiSignature = nil;
+		
+		[vpnInterfaceActiveStates release];
+		vpnInterfaceActiveStates = nil;
+		
+		[vpnServiceInterfaces release];
+		vpnServiceInterfaces = nil;
+		
+		[vpnServiceProtocolActiveStates release];
+		vpnServiceProtocolActiveStates = nil;
+	    
 	[super dealloc];
 }
 
@@ -133,18 +185,25 @@ typedef enum {
                                    &context);
 	if (!dynStore) {
 		NSLog(@"SCDynamicStoreCreate() failed: %s", SCErrorString(SCError()));
+		return;
 	}
    
    rlSrc = SCDynamicStoreCreateRunLoopSource(kCFAllocatorDefault, dynStore, 0);
+	if (!rlSrc)
+		return;
 	CFRunLoopAddSource(CFRunLoopGetMain(), rlSrc, kCFRunLoopDefaultMode);
    CFRelease(rlSrc);
 }
 
 -(void)startObserving
 {
-   [self setupDynamicStore];
-	
-    NSArray *watchedKeys = [NSArray arrayWithObjects:@"State:/Network/Interface/.*/Link", @"State:/Network/Interface/.*/AirPort", @"State:/Network/Global/IPv4", @"State:/Network/Global/IPv6", nil];
+		[self requestLocationAuthorizationIfNeeded];
+	   [self setupDynamicStore];
+	if (!dynStore)
+		return;
+		[self startMonitoringWiFiEvents];
+		
+	    NSArray *watchedKeys = [NSArray arrayWithObjects:@"State:/Network/Interface/.*/Link", @"State:/Network/Interface/.*/AirPort", @"State:/Network/Global/IPv4", @"State:/Network/Global/IPv6", @"State:/Network/Service/.*/IPv4", @"State:/Network/Service/.*/IPv6", nil];
 	if (!SCDynamicStoreSetNotificationKeys(dynStore,
                                           NULL,
                                           (CFArrayRef)watchedKeys))
@@ -153,6 +212,19 @@ typedef enum {
 		CFRelease(dynStore);
 		dynStore = NULL;
 	}
+}
+
+-(void)stopObserving
+{
+	if (rlSrc) {
+		CFRunLoopRemoveSource(CFRunLoopGetMain(), rlSrc, kCFRunLoopDefaultMode);
+		rlSrc = NULL;
+	}
+	if (dynStore) {
+		CFRelease(dynStore);
+		dynStore = NULL;
+	}
+	[self stopMonitoringWiFiEvents];
 }
 
 -(void)updateInterface:(NSString*)interface forType:(NetworkInterfaceType)type withStatus:(NSDictionary*)status {
@@ -173,15 +245,15 @@ typedef enum {
 	NSDictionary *existing = [(HWGrowlNetworkInterfaceStatus*)[networkInterfaceStates objectForKey:interfaceString] status];
 	//	NSLog(CFSTR("AirPort event"));
 	
-	NSData *newBSSID = nil;
+	id newBSSID = nil;
 	if (newValue)
 		newBSSID = [newValue objectForKey:@"BSSID"];
 	
-	NSData *oldBSSID = nil;
+	id oldBSSID = nil;
 	if (existing)
 		oldBSSID = [existing objectForKey:@"BSSID"];
 		
-	if (newValue && ![oldBSSID isEqualToData:newBSSID] && !(newBSSID && oldBSSID && CFEqual(oldBSSID, newBSSID))) {
+	if (newValue && ![oldBSSID isEqual:newBSSID] && !(newBSSID && oldBSSID && CFEqual(oldBSSID, newBSSID))) {
 		NSNumber *linkStatus = [newValue objectForKey:@"Link Status"];
 		NSNumber *powerStatus = [newValue objectForKey:@"Power Status"];
 		if (linkStatus || powerStatus) {
@@ -194,60 +266,312 @@ typedef enum {
 			}
 			NSString *networkName = nil;
 			if (status == AIRPORT_DISCONNECTED) {
-				networkName = [existing objectForKey:@"SSID_STR"];
-				if (!networkName)
-					networkName = [existing objectForKey:@"SSID"];
+				networkName = [self networkNameFromAirPortStatus:existing interface:nil];
 				if(networkName)
                     [self airportDisconnected:networkName];
 			} else {
-				networkName = [newValue objectForKey:@"SSID_STR"];
-				if (!networkName)
-					networkName = [newValue objectForKey:@"SSID"];
-				if(networkName && newBSSID){
-					[self airportConnected:networkName bssid:newBSSID];
-				}
+				[self notifyAirportConnectedForInterface:interfaceString status:newValue bssid:newBSSID retryCount:3];
 			}
 		}
 	}
 }
 
+- (NSString *)networkNameFromAirPortStatus:(NSDictionary *)status interface:(NSString *)interfaceName
+{
+	NSString *networkName = [self currentWiFiSSIDForInterface:interfaceName];
+	if (!networkName)
+		networkName = [self stringFromSSIDValue:[status objectForKey:@"SSID_STR"]];
+	if (!networkName)
+		networkName = [self stringFromSSIDValue:[status objectForKey:@"SSID"]];
+	return networkName;
+}
+
+- (NSString *)stringFromSSIDValue:(id)ssidValue
+{
+	NSMutableCharacterSet *trimCharacters = [[[NSCharacterSet whitespaceAndNewlineCharacterSet] mutableCopy] autorelease];
+	[trimCharacters formUnionWithCharacterSet:[NSCharacterSet controlCharacterSet]];
+	
+	if ([ssidValue isKindOfClass:[NSString class]]) {
+		NSString *trimmedSSID = [ssidValue stringByTrimmingCharactersInSet:trimCharacters];
+		return [trimmedSSID length] ? trimmedSSID : nil;
+	}
+	
+	if ([ssidValue isKindOfClass:[NSData class]]) {
+		NSString *ssidString = [[[NSString alloc] initWithData:ssidValue encoding:NSUTF8StringEncoding] autorelease];
+		if (!ssidString)
+			ssidString = [[[NSString alloc] initWithData:ssidValue encoding:NSISOLatin1StringEncoding] autorelease];
+		ssidString = [ssidString stringByTrimmingCharactersInSet:trimCharacters];
+		return [ssidString length] ? ssidString : nil;
+	}
+	
+	return nil;
+}
+
+- (void)requestLocationAuthorizationIfNeeded
+{
+	if (![CLLocationManager locationServicesEnabled])
+		return;
+	
+	if (!self.locationManager)
+		self.locationManager = [[[CLLocationManager alloc] init] autorelease];
+	
+	self.locationManager.delegate = self;
+	CLAuthorizationStatus authorizationStatus = [self.locationManager authorizationStatus];
+	if (authorizationStatus == kCLAuthorizationStatusNotDetermined)
+		[self.locationManager requestWhenInUseAuthorization];
+}
+
+- (void)locationManagerDidChangeAuthorization:(CLLocationManager *)manager
+{
+	CLAuthorizationStatus authorizationStatus = [manager authorizationStatus];
+	if ([self locationAuthorizationAllowsWiFiInfo:authorizationStatus]) {
+		[self notifyCurrentWiFiNetworkAfterLocationAuthorization];
+	}
+}
+
+- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
+{
+	if ([self locationAuthorizationAllowsWiFiInfo:status]) {
+		[self notifyCurrentWiFiNetworkAfterLocationAuthorization];
+	}
+}
+
+- (BOOL)locationAuthorizationAllowsWiFiInfo:(CLAuthorizationStatus)authorizationStatus
+{
+	return authorizationStatus == kCLAuthorizationStatusAuthorized ||
+		   authorizationStatus == kCLAuthorizationStatusAuthorizedAlways;
+}
+
+- (NSString *)currentWiFiSSIDForInterface:(NSString *)interfaceName
+{
+	CWInterface *wifiInterface = [self wiFiInterfaceForName:interfaceName];
+	NSString *ssid = [self ssidForWiFiInterface:wifiInterface];
+	if (!ssid && [interfaceName length]) {
+		CWInterface *defaultInterface = [self.wifiClient interface];
+		if (defaultInterface != wifiInterface)
+			ssid = [self ssidForWiFiInterface:defaultInterface];
+	}
+	return ssid;
+}
+
+- (NSString *)currentWiFiBSSIDForInterface:(NSString *)interfaceName
+{
+	CWInterface *wifiInterface = [self wiFiInterfaceForName:interfaceName];
+	NSString *bssid = [self stringFromBSSIDValue:[wifiInterface bssid]];
+	if (!bssid && [interfaceName length]) {
+		CWInterface *defaultInterface = [self.wifiClient interface];
+		if (defaultInterface != wifiInterface)
+			bssid = [self stringFromBSSIDValue:[defaultInterface bssid]];
+	}
+	return bssid;
+}
+
+- (CWInterface *)wiFiInterfaceForName:(NSString *)interfaceName
+{
+	CWInterface *wifiInterface = nil;
+	if ([interfaceName length])
+		wifiInterface = [self.wifiClient interfaceWithName:interfaceName];
+	if (!wifiInterface)
+		wifiInterface = [self.wifiClient interface];
+	return wifiInterface;
+}
+
+- (NSString *)ssidForWiFiInterface:(CWInterface *)wifiInterface
+{
+	NSString *ssid = [self stringFromSSIDValue:[wifiInterface ssid]];
+	if (!ssid)
+		ssid = [self stringFromSSIDValue:[wifiInterface ssidData]];
+	return ssid;
+}
+
+- (void)startMonitoringWiFiEvents
+{
+	if (!self.wifiClient)
+		self.wifiClient = [CWWiFiClient sharedWiFiClient];
+	
+	self.wifiClient.delegate = self;
+	[self startMonitoringWiFiEvent:CWEventTypeSSIDDidChange];
+	[self startMonitoringWiFiEvent:CWEventTypeBSSIDDidChange];
+	[self startMonitoringWiFiEvent:CWEventTypeLinkDidChange];
+}
+
+- (void)stopMonitoringWiFiEvents
+{
+	if (self.wifiClient.delegate == self)
+		self.wifiClient.delegate = nil;
+	
+	NSError *error = nil;
+	if (![self.wifiClient stopMonitoringAllEventsAndReturnError:&error] && error)
+		NSLog(@"Unable to stop CoreWLAN event monitoring: %@", error);
+}
+
+- (void)startMonitoringWiFiEvent:(CWEventType)eventType
+{
+	NSError *error = nil;
+	if (![self.wifiClient startMonitoringEventWithType:eventType error:&error] && error)
+		NSLog(@"Unable to start CoreWLAN event monitoring for %ld: %@", (long)eventType, error);
+}
+
+- (void)ssidDidChangeForWiFiInterfaceWithName:(NSString *)interfaceName
+{
+	[self notifyCurrentWiFiNetworkForInterface:interfaceName retryCount:3];
+}
+
+- (void)bssidDidChangeForWiFiInterfaceWithName:(NSString *)interfaceName
+{
+	[self notifyCurrentWiFiNetworkForInterface:interfaceName retryCount:3];
+}
+
+- (void)linkDidChangeForWiFiInterfaceWithName:(NSString *)interfaceName
+{
+	[self notifyCurrentWiFiNetworkForInterface:interfaceName retryCount:3];
+}
+
+- (void)clientConnectionInterrupted
+{
+	self.previousWiFiSignature = nil;
+}
+
+- (void)clientConnectionInvalidated
+{
+	self.previousWiFiSignature = nil;
+}
+
+- (void)notifyCurrentWiFiNetworkForInterface:(NSString *)interfaceName retryCount:(NSUInteger)retryCount
+{
+	NSString *networkName = [self currentWiFiSSIDForInterface:interfaceName];
+	NSString *bssid = [self currentWiFiBSSIDForInterface:interfaceName];
+	
+	if (networkName) {
+		[self airportConnected:networkName bssid:bssid];
+		return;
+	}
+	
+	if (retryCount == 0)
+	{
+		[self logUnavailableWiFiSSIDForInterface:interfaceName status:nil];
+		return;
+	}
+	
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+		[self notifyCurrentWiFiNetworkForInterface:interfaceName retryCount:retryCount - 1];
+	});
+}
+
+- (void)notifyAirportConnectedForInterface:(NSString *)interfaceName status:(NSDictionary *)status bssid:(id)bssidValue retryCount:(NSUInteger)retryCount
+{
+	NSString *networkName = [self networkNameFromAirPortStatus:status interface:interfaceName];
+	id effectiveBSSID = bssidValue ? bssidValue : [self currentWiFiBSSIDForInterface:interfaceName];
+	
+	if (networkName) {
+		[self airportConnected:networkName bssid:effectiveBSSID];
+		return;
+	}
+	
+	if (retryCount == 0) {
+		[self logUnavailableWiFiSSIDForInterface:interfaceName status:status];
+		return;
+	}
+	
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+		NSString *key = [NSString stringWithFormat:@"State:/Network/Interface/%@/AirPort", interfaceName];
+		CFDictionaryRef latestStatus = SCDynamicStoreCopyValue(dynStore, (CFStringRef)key);
+		NSDictionary *latestStatusDictionary = nil;
+		if (latestStatus)
+			latestStatusDictionary = [(NSDictionary *)latestStatus autorelease];
+		
+		id latestBSSID = [latestStatusDictionary objectForKey:@"BSSID"];
+		if (!latestBSSID)
+			latestBSSID = [self currentWiFiBSSIDForInterface:interfaceName];
+		
+		[self notifyAirportConnectedForInterface:interfaceName status:latestStatusDictionary bssid:latestBSSID retryCount:retryCount - 1];
+	});
+	}
+
+- (void)logUnavailableWiFiSSIDForInterface:(NSString *)interfaceName status:(NSDictionary *)status
+{
+	CLAuthorizationStatus authorizationStatus = self.locationManager ? [self.locationManager authorizationStatus] : kCLAuthorizationStatusNotDetermined;
+	CWInterface *wifiInterface = [self wiFiInterfaceForName:interfaceName];
+	NSLog(@"Wi-Fi SSID unavailable for interface %@. Location enabled=%@ authorization=%d CoreWLAN interface=%@ ssid=%@ ssidDataLength=%lu dynamicStoreSSID_STR=%@ dynamicStoreSSID=%@",
+		  interfaceName,
+		  [CLLocationManager locationServicesEnabled] ? @"YES" : @"NO",
+		  authorizationStatus,
+		  [wifiInterface interfaceName],
+		  [wifiInterface ssid],
+		  (unsigned long)[[wifiInterface ssidData] length],
+		  [status objectForKey:@"SSID_STR"],
+		  [status objectForKey:@"SSID"]);
+}
+
+- (void)notifyCurrentWiFiNetworkAfterLocationAuthorization
+{
+	CWInterface *wifiInterface = [self.wifiClient interface];
+	NSString *networkName = [self ssidForWiFiInterface:wifiInterface];
+	if (!networkName)
+		return;
+	
+	[self airportConnected:networkName bssid:[wifiInterface bssid]];
+}
+
 -(void)airportDisconnected:(NSString*)networkName {
-    NSString *imagePath = [[NSBundle mainBundle] pathForResource:@"Network-Wifi-Off" ofType:@"tif"];
-    NSData *iconData = [NSData dataWithContentsOfFile:imagePath];
+	self.previousWiFiSignature = nil;
+	
+	    NSData *iconData = HWGPNGDataForSystemSymbol(@"wifi.slash", @"Network-Wifi-Off");
     [delegate notifyWithName:@"AirportDisconnected"
 							 title:NSLocalizedString(@"AirPort Disconnected", @"")
 					 description:[NSString stringWithFormat:NSLocalizedString(@"Left network %@.", @""), networkName]
 							  icon:iconData
 			  identifierString:@"HWGrowlAirPort"
-				  contextString:nil 
+				  contextString:HWGWiFiSettingsURLString
 							plugin:self];
 }
 
--(void)airportConnected:(NSString*)name bssid:(NSData*)data {
-	const unsigned char *bssidBytes = [data bytes];
+-(void)airportConnected:(NSString*)name bssid:(id)bssidValue {
+	NSString *ssid = [self stringFromSSIDValue:name];
+	if (!ssid)
+		return;
 	
-	NSString *bssid = [NSString stringWithFormat:@"%02X:%02X:%02X:%02X:%02X:%02X",
-							 bssidBytes[0],
-							 bssidBytes[1],
-							 bssidBytes[2],
-							 bssidBytes[3],
-							 bssidBytes[4],
-							 bssidBytes[5]];
-	NSString *description = [NSString stringWithFormat:NSLocalizedString(@"Joined network.\nSSID:\t\t%@\nBSSID:\t%@", ""),
-									 name,
-									 bssid];
+	NSString *bssid = [self stringFromBSSIDValue:bssidValue];
+	NSString *signature = [NSString stringWithFormat:@"%@|%@", ssid, bssid ? bssid : @""];
+	if ([signature isEqualToString:self.previousWiFiSignature])
+		return;
+	self.previousWiFiSignature = signature;
+	
+	NSString *description = [NSString stringWithFormat:NSLocalizedString(@"Joined network.\nSSID: %@\nBSSID: %@", @"AirPort connected notification body"),
+										 ssid,
+										 bssid ? bssid : NSLocalizedString(@"Unknown", @"Unknown network BSSID")];
+	NSString *title = [NSString stringWithFormat:NSLocalizedString(@"AirPort Connected: %@", @"AirPort connected notification title with SSID"), ssid];
+	NSString *identifier = [NSString stringWithFormat:@"HWGrowlAirPort-%@-%@", ssid, bssid ? bssid : @"UnknownBSSID"];
 	
     
-    NSString *imagePath = [[NSBundle mainBundle] pathForResource:@"Network-Wifi-4" ofType:@"tif"];
-    NSData *iconData = [NSData dataWithContentsOfFile:imagePath];
+    NSData *iconData = HWGPNGDataForSystemSymbol(@"wifi", @"Network-Wifi-4");
 
 	[delegate notifyWithName:@"AirportConnected"
-							 title:NSLocalizedString(@"AirPort Connected", @"")
+							 title:title
 					 description:description
 							  icon:iconData
-			  identifierString:@"HWGrowlAirPort"
-				  contextString:nil
+			  identifierString:identifier
+				  contextString:HWGWiFiSettingsURLString
 							plugin:self];
+}
+
+- (NSString *)stringFromBSSIDValue:(id)bssidValue
+{
+	if ([bssidValue isKindOfClass:[NSString class]])
+		return [bssidValue length] ? bssidValue : nil;
+	
+	if ([bssidValue isKindOfClass:[NSData class]] && [bssidValue length] >= 6) {
+		const unsigned char *bssidBytes = [bssidValue bytes];
+		return [NSString stringWithFormat:@"%02X:%02X:%02X:%02X:%02X:%02X",
+				bssidBytes[0],
+				bssidBytes[1],
+				bssidBytes[2],
+				bssidBytes[3],
+				bssidBytes[4],
+				bssidBytes[5]];
+	}
+	
+	return nil;
 }
 
 -(void)updateLinkWithInterface:(HWGrowlNetworkInterfaceStatus*)interface {
@@ -256,28 +580,38 @@ typedef enum {
 	NSDictionary *existing = [(HWGrowlNetworkInterfaceStatus*)[networkInterfaceStates objectForKey:interfaceString] status];
 	int newActive = [[newValue objectForKey:@"Active"] intValue];
 	int oldActive = [[existing objectForKey:@"Active"] intValue];
+	BOOL isVPNInterface = HWGNetworkInterfaceNameIsVPN(interfaceString);
+	if (isVPNInterface)
+		[self updateVPNInterface:interfaceString active:(newActive != 0)];
 	
 	NSString *noteName = nil;
 	NSString *noteTitle = nil;
 	NSString *noteDescription = nil;
 	NSString *imageName = nil;
 	if (newActive && !oldActive) {
-		noteName = @"NetworkLinkUp";
-		noteTitle = NSLocalizedString(@"Network Link Up", @"");
-		noteDescription = [NSString stringWithFormat:
-								 NSLocalizedString(@"Interface:\t%@\nMedia:\t%@", "The first %@ will be replaced with the interface (en0, en1, etc) second %@ will be replaced by a description of the Ethernet media such as '100BT/full-duplex'"),
-								 interfaceString,
-								 [self getMediaForInterface:interfaceString]];
-		imageName = @"Network-Ethernet-On";
+		if (isVPNInterface) {
+			noteName = nil;
+		} else {
+			noteName = @"NetworkLinkUp";
+			noteTitle = NSLocalizedString(@"Network Link Up", @"");
+			noteDescription = [NSString stringWithFormat:
+									 NSLocalizedString(@"Interface:\t%@\nMedia:\t%@", "The first %@ will be replaced with the interface (en0, en1, etc) second %@ will be replaced by a description of the Ethernet media such as '100BT/full-duplex'"),
+									 interfaceString,
+									 [self getMediaForInterface:interfaceString]];
+			imageName = @"Network-Ethernet-On";
+		}
 	} else if (!newActive && oldActive) {
-		noteName = @"NetworkLinkDown";
-		noteTitle = NSLocalizedString(@"Network Link Down", @"");
-		noteDescription = [NSString stringWithFormat:NSLocalizedString(@"Interface:\t%@", nil), interfaceString];
-		imageName = @"Network-Ethernet-Off";
+		if (isVPNInterface) {
+			noteName = nil;
+		} else {
+			noteName = @"NetworkLinkDown";
+			noteTitle = NSLocalizedString(@"Network Link Down", @"");
+			noteDescription = [NSString stringWithFormat:NSLocalizedString(@"Interface:\t%@", nil), interfaceString];
+			imageName = @"Network-Ethernet-Off";
+		}
 	}
 	
-    NSString *imagePath = [[NSBundle mainBundle] pathForResource:imageName ofType:@"tif"];
-    NSData *iconData = [NSData dataWithContentsOfFile:imagePath];
+    NSData *iconData = HWGPNGDataForSystemSymbol(newActive ? @"network" : @"network.slash", imageName);
    
 	if(noteName){
 		[delegate notifyWithName:noteName
@@ -285,9 +619,76 @@ typedef enum {
 						 description:noteDescription
 								  icon:iconData
 				  identifierString:@"HWGrowlNetworkLink"
-					  contextString:nil
+					  contextString:HWGNetworkSettingsURLString
 								plugin:self];
 	}
+}
+
+- (void)updateVPNInterface:(NSString *)interfaceName active:(BOOL)active
+{
+	if (![interfaceName length])
+		return;
+	
+	NSNumber *oldActiveNumber = [self.vpnInterfaceActiveStates objectForKey:interfaceName];
+	BOOL oldActive = [oldActiveNumber boolValue];
+	if (oldActiveNumber && oldActive == active)
+		return;
+	
+	[self.vpnInterfaceActiveStates setObject:[NSNumber numberWithBool:active] forKey:interfaceName];
+	if (!oldActiveNumber && !active)
+		return;
+	
+	NSString *noteName = active ? @"VPNConnected" : @"VPNDisconnected";
+	NSString *noteTitle = active ? NSLocalizedString(@"VPN Connected", @"") : NSLocalizedString(@"VPN Disconnected", @"");
+	NSString *noteDescription = [NSString stringWithFormat:NSLocalizedString(@"Interface:\t%@", nil), interfaceName];
+	NSData *iconData = HWGPNGDataForSystemSymbol(active ? @"network.badge.shield.half.filled" : @"network.slash", active ? @"Network-Generic-On" : @"Network-Generic-Off");
+	NSString *identifier = [NSString stringWithFormat:@"HWGrowlVPN-%@", interfaceName];
+	
+	[delegate notifyWithName:noteName
+						 title:noteTitle
+				 description:noteDescription
+						  icon:iconData
+		  identifierString:identifier
+			  contextString:HWGVPNSettingsURLString
+						plugin:self];
+}
+
+- (void)updateVPNServiceWithKey:(NSString *)key status:(NSDictionary *)status
+{
+	NSArray *components = [key componentsSeparatedByString:@"/"];
+	if ([components count] < 5)
+		return;
+	
+	NSString *serviceID = [components objectAtIndex:3];
+	NSString *protocolName = [components lastObject];
+	NSString *serviceProtocolKey = [NSString stringWithFormat:@"%@/%@", serviceID, protocolName];
+	NSString *interfaceName = [status objectForKey:@"InterfaceName"];
+	if (!interfaceName)
+		interfaceName = [self.vpnServiceInterfaces objectForKey:serviceID];
+	if (![interfaceName length])
+		return;
+	if (!HWGNetworkInterfaceNameIsVPN(interfaceName))
+		return;
+	
+	if ([status objectForKey:@"InterfaceName"])
+		[self.vpnServiceInterfaces setObject:interfaceName forKey:serviceID];
+	
+	NSArray *addresses = [status objectForKey:@"Addresses"];
+	BOOL protocolActive = [addresses isKindOfClass:[NSArray class]] && [addresses count] > 0;
+	[self.vpnServiceProtocolActiveStates setObject:[NSNumber numberWithBool:protocolActive] forKey:serviceProtocolKey];
+	
+	BOOL serviceActive = NO;
+	NSString *servicePrefix = [serviceID stringByAppendingString:@"/"];
+	for (NSString *trackedKey in self.vpnServiceProtocolActiveStates) {
+		if ([trackedKey hasPrefix:servicePrefix] && [[self.vpnServiceProtocolActiveStates objectForKey:trackedKey] boolValue]) {
+			serviceActive = YES;
+			break;
+		}
+	}
+	
+	[self updateVPNInterface:interfaceName active:serviceActive];
+	if (!serviceActive)
+		[self.vpnServiceInterfaces removeObjectForKey:serviceID];
 }
 
 /* TO DO: REWRITE ME WITH BETTER METHODS OF GETTING INFO */
@@ -372,14 +773,13 @@ typedef enum {
 		imageName = @"Network-Generic-On";
 	}
 
-    NSString *imagePath = [[NSBundle mainBundle] pathForResource:imageName ofType:@"tif"];
-    NSData *iconData = [NSData dataWithContentsOfFile:imagePath];
+    NSData *iconData = HWGPNGDataForSystemSymbol([combined length] ? @"network" : @"network.slash", imageName);
 	[delegate notifyWithName:@"IPAddressChange"
 							 title:NSLocalizedString(@"IP Addresses Updated", @"")
 					 description:combined ? combined : NSLocalizedString(@"No routable IP addresses", @"")
 							  icon:iconData
 			  identifierString:@"HWGrowlIPAddressChange"
-				  contextString:nil
+				  contextString:HWGNetworkSettingsURLString
 							plugin:self];
 	
 	self.previousIPCombined = combined;
@@ -464,6 +864,13 @@ static void scCallback(SCDynamicStoreRef store, CFArrayRef changedKeys, void *in
                     else
                         NSLog(@"Invalid Notification: %@", key);
             }
+			else if([key hasPrefix:@"State:/Network/Service"])
+			{
+				CFDictionaryRef status = SCDynamicStoreCopyValue(store, (CFStringRef)key);
+				[observer updateVPNServiceWithKey:key status:(NSDictionary *)status];
+				if (status)
+					CFRelease(status);
+			}
         }];
     }
 }
@@ -494,24 +901,40 @@ static void scCallback(SCDynamicStoreRef store, CFArrayRef changedKeys, void *in
 #pragma mark HWGrowlPluginNotifierProtocol
 
 -(NSArray*)noteNames {
-	return [NSArray arrayWithObjects:@"IPAddressChange", @"NetworkLinkUp", @"NetworkLinkDown", @"AirportConnected", @"AirportDisconnected", nil];
+	return [NSArray arrayWithObjects:@"IPAddressChange", @"NetworkLinkUp", @"NetworkLinkDown", @"AirportConnected", @"AirportDisconnected", @"VPNConnected", @"VPNDisconnected", nil];
 }
 -(NSDictionary*)localizedNames {
 	return [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"IP Address Changed", @""), @"IPAddressChange",
 			  NSLocalizedString(@"Network Link Up", @""), @"NetworkLinkUp",
 			  NSLocalizedString(@"Network Link Down", @""), @"NetworkLinkDown", 
 			  NSLocalizedString(@"AirPort Connected", @""), @"AirportConnected", 
-			  NSLocalizedString(@"AirPort Disconnected", @""), @"AirportDisconnected", nil];
+			  NSLocalizedString(@"AirPort Disconnected", @""), @"AirportDisconnected",
+			  NSLocalizedString(@"VPN Connected", @""), @"VPNConnected",
+			  NSLocalizedString(@"VPN Disconnected", @""), @"VPNDisconnected", nil];
 }
 -(NSDictionary*)noteDescriptions {
 	return [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Sent when the systems IP address changes", @""), @"IPAddressChange", 
 			  NSLocalizedString(@"Sent when an Ethernet link starts", @""), @"NetworkLinkUp",
 			  NSLocalizedString(@"Sent when an Ethernet link goes down", @""), @"NetworkLinkDown", 
 			  NSLocalizedString(@"Sent when AirPort connects to a network", @""), @"AirportConnected", 
-			  NSLocalizedString(@"Sent when AirPort disconnects from a network", @""), @"AirportDisconnected", nil];
+			  NSLocalizedString(@"Sent when AirPort disconnects from a network", @""), @"AirportDisconnected",
+			  NSLocalizedString(@"Sent when a VPN connects", @""), @"VPNConnected",
+			  NSLocalizedString(@"Sent when a VPN disconnects", @""), @"VPNDisconnected", nil];
 }
 -(NSArray*)defaultNotifications {
-	return [NSArray arrayWithObjects:@"IPAddressChange", @"NetworkLinkUp", @"NetworkLinkDown", @"AirportConnected", @"AirportDisconnected", nil];
+	return [NSArray arrayWithObjects:@"IPAddressChange", @"NetworkLinkUp", @"NetworkLinkDown", @"AirportConnected", @"AirportDisconnected", @"VPNConnected", @"VPNDisconnected", nil];
+}
+
+-(void)noteClosed:(NSString*)contextString byClick:(BOOL)clicked {
+	if(clicked && [contextString length]) {
+		NSURL *settingsURL = [NSURL URLWithString:contextString];
+		dispatch_async(dispatch_get_main_queue(), ^{
+			if (![[NSWorkspace sharedWorkspace] openURL:settingsURL]) {
+				NSURL *fallbackURL = [NSURL URLWithString:HWGNetworkSettingsURLString];
+				[[NSWorkspace sharedWorkspace] openURL:fallbackURL];
+			}
+		});
+	}
 }
 
 @end

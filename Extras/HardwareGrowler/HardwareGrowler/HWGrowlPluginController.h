@@ -7,13 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <Growl/Growl.h>
 #import "HardwareGrowlPlugin.h"
+#import "HWNotificationAdapter.h"
 
-@interface HWGrowlPluginController : NSObject <HWGrowlPluginControllerProtocol, GrowlApplicationBridgeDelegate> {
+@interface HWGrowlPluginController : NSObject <HWGrowlPluginControllerProtocol, HWNotificationAdapterDelegate> {
 	NSMutableArray *plugins;
 	NSMutableArray *notifiers;
 	NSMutableArray *monitors;
+	HWNotificationAdapter *notificationAdapter;
 }
 
 @property (nonatomic, retain) NSMutableArray *plugins;

@@ -43,11 +43,13 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    if([keyPath isEqualToString:@"state"])
+    if(object == self && [keyPath isEqualToString:@"state"])
     {
         self.onLabel.textColor = (self.state ? [NSColor blueColor] : [NSColor blackColor]);
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+        return;
     }
+    
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 }
 
 - (void)setNilValueForKey:(NSString *)key

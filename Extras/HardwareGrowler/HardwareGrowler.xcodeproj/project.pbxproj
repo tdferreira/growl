@@ -14,6 +14,9 @@
 		932173DC163A43F200D5790F /* BluetoothMonitor.hwgrowlmonitor in Copy Plugins */ = {isa = PBXBuildFile; fileRef = BCA26B5D155585C0009C5ABC /* BluetoothMonitor.hwgrowlmonitor */; };
 		932173DD163A43F200D5790F /* FirewireMonitor.hwgrowlmonitor in Copy Plugins */ = {isa = PBXBuildFile; fileRef = BCA26B871555B3F5009C5ABC /* FirewireMonitor.hwgrowlmonitor */; };
 		932173DE163A43F200D5790F /* PowerMonitor.hwgrowlmonitor in Copy Plugins */ = {isa = PBXBuildFile; fileRef = BCA26BB31555BB1A009C5ABC /* PowerMonitor.hwgrowlmonitor */; };
+		D0A0000A18BCA00000000000 /* ThunderboltMonitor.hwgrowlmonitor in Copy Plugins */ = {isa = PBXBuildFile; fileRef = BC75524E156528AA00CB0542 /* ThunderboltMonitor.hwgrowlmonitor */; };
+		D0A0000B18BCA00000000000 /* TimeMachineMonitor.hwgrowlmonitor in Copy Plugins */ = {isa = PBXBuildFile; fileRef = BCF62369156878CC00AB4676 /* TimeMachineMonitor.hwgrowlmonitor */; };
+		D0A0001018BCA00000000000 /* PhoneMonitor.hwgrowlmonitor in Copy Plugins */ = {isa = PBXBuildFile; fileRef = BCE83C6515804D2C005570DD /* PhoneMonitor.hwgrowlmonitor */; };
 		BC006C3215AB004900643FA8 /* HWGPrefsBluetooth.tif in Resources */ = {isa = PBXBuildFile; fileRef = BC006C2515AB004900643FA8 /* HWGPrefsBluetooth.tif */; };
 		BC006C3315AB004900643FA8 /* HWGPrefsCapster.tif in Resources */ = {isa = PBXBuildFile; fileRef = BC006C2615AB004900643FA8 /* HWGPrefsCapster.tif */; };
 		BC006C3415AB004900643FA8 /* HWGPrefsDefault.tif in Resources */ = {isa = PBXBuildFile; fileRef = BC006C2715AB004900643FA8 /* HWGPrefsDefault.tif */; };
@@ -64,17 +67,17 @@
 		BC006CAF15AB161800643FA8 /* TimeMachine-Off.tif in Resources */ = {isa = PBXBuildFile; fileRef = BC006CAC15AB161600643FA8 /* TimeMachine-Off.tif */; };
 		BC006CB015AB161800643FA8 /* TimeMachine-On.tif in Resources */ = {isa = PBXBuildFile; fileRef = BC006CAD15AB161700643FA8 /* TimeMachine-On.tif */; };
 		BC4FC623155C04B700EE65EC /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = BC4FC622155C04B700EE65EC /* MainMenu.xib */; };
-		BC523C231555686000548427 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EB155153330088C69A /* Cocoa.framework */; };
+		BC523C231555686000548427 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EE155153330088C69A /* AppKit.framework */; };
 		BC523C291555686000548427 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BC523C271555686000548427 /* InfoPlist.strings */; };
 		BC523C31155568A000548427 /* HWGrowlUSBMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = BC523C30155568A000548427 /* HWGrowlUSBMonitor.m */; };
 		BC523C3715556BFA00548427 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC523C3515556BE500548427 /* IOKit.framework */; };
 		BC5ADEA115643AFD0042C168 /* PowerMonitorPrefs.xib in Resources */ = {isa = PBXBuildFile; fileRef = BC5ADEA015643AFD0042C168 /* PowerMonitorPrefs.xib */; };
-		BC5BF7EC15752CEF0088443E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EB155153330088C69A /* Cocoa.framework */; };
+		BC5BF7EC15752CEF0088443E /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EE155153330088C69A /* AppKit.framework */; };
 		BC5BF7F215752CEF0088443E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BC5BF7F015752CEF0088443E /* InfoPlist.strings */; };
 		BC5BF7FA15752D4D0088443E /* HWGrowlKeyboardMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = BC5BF7F915752D4D0088443E /* HWGrowlKeyboardMonitor.m */; };
 		BC5BF8271576599F0088443E /* KeyboardMonitorPrefs.xib in Resources */ = {isa = PBXBuildFile; fileRef = BC5BF816157658810088443E /* KeyboardMonitorPrefs.xib */; };
 		BC7300AB1554594900CCCA74 /* VolumeMonitorPrefs.xib in Resources */ = {isa = PBXBuildFile; fileRef = BC7300AA1554594900CCCA74 /* VolumeMonitorPrefs.xib */; };
-		BC75524F156528AA00CB0542 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EB155153330088C69A /* Cocoa.framework */; };
+		BC75524F156528AA00CB0542 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EE155153330088C69A /* AppKit.framework */; };
 		BC755255156528AA00CB0542 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BC755253156528AA00CB0542 /* InfoPlist.strings */; };
 		BC75526C1565291400CB0542 /* HWGrowlThunderboltMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = BC75526B1565291400CB0542 /* HWGrowlThunderboltMonitor.m */; };
 		BC75527015652BB100CB0542 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC523C3515556BE500548427 /* IOKit.framework */; };
@@ -82,29 +85,36 @@
 		BC79898715E936BF00CDC5A0 /* SliderHandle@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BC79898315E936BF00CDC5A0 /* SliderHandle@2x.png */; };
 		BC79898815E936BF00CDC5A0 /* SliderHandleDown@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BC79898415E936BF00CDC5A0 /* SliderHandleDown@2x.png */; };
 		BC79898915E936BF00CDC5A0 /* SliderWell@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BC79898515E936BF00CDC5A0 /* SliderWell@2x.png */; };
-		BCA26B5E155585C0009C5ABC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EB155153330088C69A /* Cocoa.framework */; };
+		BCA26B5E155585C0009C5ABC /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EE155153330088C69A /* AppKit.framework */; };
 		BCA26B64155585C0009C5ABC /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BCA26B62155585C0009C5ABC /* InfoPlist.strings */; };
 		BCA26B6C155585FA009C5ABC /* HWGrowlBluetoothMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = BCA26B6B155585FA009C5ABC /* HWGrowlBluetoothMonitor.m */; };
 		BCA26B7215558853009C5ABC /* IOBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCA26B7015558837009C5ABC /* IOBluetooth.framework */; };
-		BCA26B881555B3F5009C5ABC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EB155153330088C69A /* Cocoa.framework */; };
+		BCA26B881555B3F5009C5ABC /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EE155153330088C69A /* AppKit.framework */; };
 		BCA26B8E1555B3F5009C5ABC /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BCA26B8C1555B3F5009C5ABC /* InfoPlist.strings */; };
 		BCA26BA51555B46F009C5ABC /* HWGrowlFirewireMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = BCA26BA41555B46F009C5ABC /* HWGrowlFirewireMonitor.m */; };
 		BCA26BAE1555BA11009C5ABC /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC523C3515556BE500548427 /* IOKit.framework */; };
-		BCA26BB41555BB1B009C5ABC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EB155153330088C69A /* Cocoa.framework */; };
+		BCA26BB41555BB1B009C5ABC /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EE155153330088C69A /* AppKit.framework */; };
 		BCA26BBA1555BB1B009C5ABC /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BCA26BB81555BB1B009C5ABC /* InfoPlist.strings */; };
 		BCAA1764155784C800D9E4ED /* HWGrowlPowerMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = BCAA1763155784C800D9E4ED /* HWGrowlPowerMonitor.m */; };
 		BCAA1778155804A000D9E4ED /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC523C3515556BE500548427 /* IOKit.framework */; };
-		BCB805EC155153330088C69A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EB155153330088C69A /* Cocoa.framework */; };
+		BCB805EC155153330088C69A /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EE155153330088C69A /* AppKit.framework */; };
 		BCB805F6155153330088C69A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BCB805F4155153330088C69A /* InfoPlist.strings */; };
 		BCB805F8155153330088C69A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BCB805F7155153330088C69A /* main.m */; };
 		BCB805FC155153330088C69A /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = BCB805FA155153330088C69A /* Credits.rtf */; };
 		BCB805FF155153330088C69A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BCB805FE155153330088C69A /* AppDelegate.m */; };
+		D0A0000318BCA00000000000 /* HWNotificationAdapter.m in Sources */ = {isa = PBXBuildFile; fileRef = D0A0000218BCA00000000000 /* HWNotificationAdapter.m */; };
+		D0A0000618BCA00000000000 /* HWLoginItemController.m in Sources */ = {isa = PBXBuildFile; fileRef = D0A0000518BCA00000000000 /* HWLoginItemController.m */; };
+		D0A0001418BCA00000000000 /* OSLog.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A0001318BCA00000000000 /* OSLog.framework */; };
+		D0A0001618BCA00000000000 /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A0001518BCA00000000000 /* CoreWLAN.framework */; };
+		D0A0001818BCA00000000000 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A0001718BCA00000000000 /* CoreLocation.framework */; };
 		BCB8061D155154CA0088C69A /* HWGrowler.icns in Resources */ = {isa = PBXBuildFile; fileRef = BCB80611155154CA0088C69A /* HWGrowler.icns */; };
-		BCB8061E155154CA0088C69A /* menubarIcon_Normal.png in Resources */ = {isa = PBXBuildFile; fileRef = BCB80612155154CA0088C69A /* menubarIcon_Normal.png */; };
-		BCB8061F155154CA0088C69A /* menubarIcon_Selected.png in Resources */ = {isa = PBXBuildFile; fileRef = BCB80613155154CA0088C69A /* menubarIcon_Selected.png */; };
-		BCB806981551595A0088C69A /* Growl.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = BCB80673155158DA0088C69A /* Growl.framework */; };
-		BCB806991551597C0088C69A /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB80673155158DA0088C69A /* Growl.framework */; };
-		BCB806B015515C4E0088C69A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EB155153330088C69A /* Cocoa.framework */; };
+		D0B0001818BCA10000000000 /* menubarIconTemplate.png in Resources */ = {isa = PBXBuildFile; fileRef = D0B0001618BCA10000000000 /* menubarIconTemplate.png */; };
+		D0A0000818BCA00000000000 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A0000718BCA00000000000 /* UserNotifications.framework */; };
+		D0B0000418BCA10000000000 /* HWImageHelperTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B0000118BCA10000000000 /* HWImageHelperTests.m */; };
+		D0B0001218BCA10000000000 /* HWNetworkMonitorUtilitiesTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B0001118BCA10000000000 /* HWNetworkMonitorUtilitiesTests.m */; };
+		D0B0000618BCA10000000000 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0B0000518BCA10000000000 /* XCTest.framework */; };
+		D0B0000718BCA10000000000 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EE155153330088C69A /* AppKit.framework */; };
+		BCB806B015515C4E0088C69A /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EE155153330088C69A /* AppKit.framework */; };
 		BCB806B615515C4E0088C69A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BCB806B415515C4E0088C69A /* InfoPlist.strings */; };
 		BCB806B815515C4E0088C69A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BCB806B715515C4E0088C69A /* main.m */; };
 		BCB806BC15515C4E0088C69A /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = BCB806BA15515C4E0088C69A /* Credits.rtf */; };
@@ -114,12 +124,11 @@
 		BCB806D115515DA20088C69A /* HardwareGrowlerLauncher.app in Copy Launcher */ = {isa = PBXBuildFile; fileRef = BCB806AE15515C4E0088C69A /* HardwareGrowlerLauncher.app */; };
 		BCB806F8155178340088C69A /* GrowlOnSwitch.m in Sources */ = {isa = PBXBuildFile; fileRef = BCB806F5155178340088C69A /* GrowlOnSwitch.m */; };
 		BCB8070815517EE90088C69A /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB8070615517EE10088C69A /* ServiceManagement.framework */; };
-		BCB807481551A6EA0088C69A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EB155153330088C69A /* Cocoa.framework */; };
+		BCB807481551A6EA0088C69A /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EE155153330088C69A /* AppKit.framework */; };
 		BCB8074F1551A6EA0088C69A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BCB8074D1551A6EA0088C69A /* InfoPlist.strings */; };
 		BCB8076A1551A7510088C69A /* HWGrowlNetworkMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = BCB807691551A7510088C69A /* HWGrowlNetworkMonitor.m */; };
 		BCB8076F1551A82B0088C69A /* HWGrowlPluginController.m in Sources */ = {isa = PBXBuildFile; fileRef = BCB8076E1551A82A0088C69A /* HWGrowlPluginController.m */; };
 		BCD4756A156BCDD000F81910 /* ACImageAndTextCell.m in Sources */ = {isa = PBXBuildFile; fileRef = BCD47569156BCDD000F81910 /* ACImageAndTextCell.m */; };
-		BCE06FFB178CCAA700D7839A /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB80673155158DA0088C69A /* Growl.framework */; };
 		BCE06FFC178CCBF500D7839A /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = BC4FC626155C05C700EE65EC /* Localizable.strings */; };
 		BCE3BC1C15C9619000B0BFFB /* TMSliderControl.m in Sources */ = {isa = PBXBuildFile; fileRef = BCE3BC1B15C9619000B0BFFB /* TMSliderControl.m */; };
 		BCE3BC2115C961A500B0BFFB /* OverlayMask.png in Resources */ = {isa = PBXBuildFile; fileRef = BCE3BC1D15C961A500B0BFFB /* OverlayMask.png */; };
@@ -128,16 +137,17 @@
 		BCE3BC2415C961A500B0BFFB /* SliderWell.png in Resources */ = {isa = PBXBuildFile; fileRef = BCE3BC2015C961A500B0BFFB /* SliderWell.png */; };
 		BCE3BC2715C9620E00B0BFFB /* GrowlOnSwitchLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = BCE3BC2615C9620E00B0BFFB /* GrowlOnSwitchLabel.m */; };
 		BCE3BC2915C9640700B0BFFB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCE3BC2815C9640600B0BFFB /* QuartzCore.framework */; };
-		BCE83C6615804D2C005570DD /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EB155153330088C69A /* Cocoa.framework */; };
+		BCE83C6615804D2C005570DD /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EE155153330088C69A /* AppKit.framework */; };
 		BCE83C6C15804D2C005570DD /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BCE83C6A15804D2C005570DD /* InfoPlist.strings */; };
 		BCE83C7615804F8B005570DD /* HWGrowlPhoneMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = BCE83C7515804F8B005570DD /* HWGrowlPhoneMonitor.m */; };
 		BCE83C781580580C005570DD /* IOBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCA26B7015558837009C5ABC /* IOBluetooth.framework */; };
 		BCECA3651552D1D300F49280 /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = BCECA3631552D1C500F49280 /* NSStringAdditions.m */; };
+		D0A0000918BCA00000000000 /* GrowlNetworkUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = BCECA36A1552D24C00F49280 /* GrowlNetworkUtilities.m */; };
 		BCECA3681552D22100F49280 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCECA3661552D1FA00F49280 /* SystemConfiguration.framework */; };
-		BCECA38D155322D200F49280 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EB155153330088C69A /* Cocoa.framework */; };
+		BCECA38D155322D200F49280 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EE155153330088C69A /* AppKit.framework */; };
 		BCECA394155322D200F49280 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BCECA392155322D200F49280 /* InfoPlist.strings */; };
 		BCECA3AB155322FD00F49280 /* HWGrowlVolumeMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = BCECA3AA155322FD00F49280 /* HWGrowlVolumeMonitor.m */; };
-		BCF6236A156878CC00AB4676 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EB155153330088C69A /* Cocoa.framework */; };
+		BCF6236A156878CC00AB4676 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EE155153330088C69A /* AppKit.framework */; };
 		BCF62370156878CC00AB4676 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BCF6236E156878CC00AB4676 /* InfoPlist.strings */; };
 		BCF6237C15687B2E00AB4676 /* HWGrowlTimeMachineMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = BCF6237B15687B2E00AB4676 /* HWGrowlTimeMachineMonitor.m */; };
 /* End PBXBuildFile section */
@@ -191,13 +201,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = BC29B27714D12D5300C72855;
 			remoteInfo = GrowlLauncher;
-		};
-		BCB80672155158DA0088C69A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BCB8065B155158DA0088C69A /* Growl.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 34F60EAB078E1CD500CECA86;
-			remoteInfo = Growl.framework;
 		};
 		BCB80674155158DA0088C69A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -290,13 +293,6 @@
 			remoteGlobalIDString = FF93C8E214218EB3007EAC43;
 			remoteInfo = GNTPClientService;
 		};
-		BCB8068F155158F50088C69A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BCB8065B155158DA0088C69A /* Growl.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 34F60EAA078E1CD500CECA86;
-			remoteInfo = Growl.framework;
-		};
 		BCB806CE15515D700088C69A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BCB805DE155153330088C69A /* Project object */;
@@ -318,6 +314,27 @@
 			remoteGlobalIDString = BCECA38B155322D200F49280;
 			remoteInfo = VolumeMonitor;
 		};
+		D0A0000C18BCA00000000000 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BCB805DE155153330088C69A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BC75524D156528AA00CB0542;
+			remoteInfo = ThunderboltMonitor;
+		};
+		D0A0000D18BCA00000000000 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BCB805DE155153330088C69A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BCF62368156878CC00AB4676;
+			remoteInfo = TimeMachineMonitor;
+		};
+		D0A0001118BCA00000000000 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BCB805DE155153330088C69A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BCE83C6415804D2C005570DD;
+			remoteInfo = PhoneMonitor;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -327,7 +344,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				BCB806981551595A0088C69A /* Growl.framework in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -356,6 +372,9 @@
 				932173DD163A43F200D5790F /* FirewireMonitor.hwgrowlmonitor in Copy Plugins */,
 				932173DE163A43F200D5790F /* PowerMonitor.hwgrowlmonitor in Copy Plugins */,
 				932173D816390DB700D5790F /* KeyboardMonitor.hwgrowlmonitor in Copy Plugins */,
+				D0A0000A18BCA00000000000 /* ThunderboltMonitor.hwgrowlmonitor in Copy Plugins */,
+				D0A0000B18BCA00000000000 /* TimeMachineMonitor.hwgrowlmonitor in Copy Plugins */,
+				D0A0001018BCA00000000000 /* PhoneMonitor.hwgrowlmonitor in Copy Plugins */,
 			);
 			name = "Copy Plugins";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -492,9 +511,9 @@
 		BCAA1762155784C800D9E4ED /* HWGrowlPowerMonitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HWGrowlPowerMonitor.h; sourceTree = "<group>"; };
 		BCAA1763155784C800D9E4ED /* HWGrowlPowerMonitor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWGrowlPowerMonitor.m; sourceTree = "<group>"; };
 		BCB805E7155153330088C69A /* HardwareGrowler.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HardwareGrowler.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		BCB805EB155153330088C69A /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		BCB805EE155153330088C69A /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		BCB805F0155153330088C69A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		D0A0000718BCA00000000000 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		BCB805F3155153330088C69A /* HardwareGrowler-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "HardwareGrowler-Info.plist"; sourceTree = "<group>"; };
 		BCB805F5155153330088C69A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		BCB805F7155153330088C69A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -503,8 +522,8 @@
 		BCB805FD155153330088C69A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		BCB805FE155153330088C69A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		BCB80611155154CA0088C69A /* HWGrowler.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = HWGrowler.icns; path = Resources/HWGrowler.icns; sourceTree = SOURCE_ROOT; };
-		BCB80612155154CA0088C69A /* menubarIcon_Normal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = menubarIcon_Normal.png; path = Resources/menubarIcon_Normal.png; sourceTree = SOURCE_ROOT; };
-		BCB80613155154CA0088C69A /* menubarIcon_Selected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = menubarIcon_Selected.png; path = Resources/menubarIcon_Selected.png; sourceTree = SOURCE_ROOT; };
+		D0B0001618BCA10000000000 /* menubarIconTemplate.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = menubarIconTemplate.png; path = Resources/menubarIconTemplate.png; sourceTree = SOURCE_ROOT; };
+		D0B0001718BCA10000000000 /* menubarIconTemplate.svg */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = menubarIconTemplate.svg; path = Resources/menubarIconTemplate.svg; sourceTree = SOURCE_ROOT; };
 		BCB8065B155158DA0088C69A /* Growl.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Growl.xcodeproj; path = ../../../Growl.xcodeproj; sourceTree = "<group>"; };
 		BCB806AE15515C4E0088C69A /* HardwareGrowlerLauncher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HardwareGrowlerLauncher.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BCB806B315515C4E0088C69A /* HardwareGrowlerLauncher-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "HardwareGrowlerLauncher-Info.plist"; sourceTree = "<group>"; };
@@ -529,6 +548,19 @@
 		BCB8076B1551A7820088C69A /* HardwareGrowlPlugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = HardwareGrowlPlugin.h; path = ../HardwareGrowler/HardwareGrowlPlugin.h; sourceTree = "<group>"; };
 		BCB8076D1551A82A0088C69A /* HWGrowlPluginController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = HWGrowlPluginController.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		BCB8076E1551A82A0088C69A /* HWGrowlPluginController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWGrowlPluginController.m; sourceTree = "<group>"; };
+		D0A0000118BCA00000000000 /* HWNotificationAdapter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HWNotificationAdapter.h; sourceTree = "<group>"; };
+		D0A0000218BCA00000000000 /* HWNotificationAdapter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWNotificationAdapter.m; sourceTree = "<group>"; };
+		D0A0000418BCA00000000000 /* HWLoginItemController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HWLoginItemController.h; sourceTree = "<group>"; };
+		D0A0000518BCA00000000000 /* HWLoginItemController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWLoginItemController.m; sourceTree = "<group>"; };
+		D0A0001318BCA00000000000 /* OSLog.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSLog.framework; path = System/Library/Frameworks/OSLog.framework; sourceTree = SDKROOT; };
+		D0A0001518BCA00000000000 /* CoreWLAN.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreWLAN.framework; path = System/Library/Frameworks/CoreWLAN.framework; sourceTree = SDKROOT; };
+		D0A0001718BCA00000000000 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		D0B0000118BCA10000000000 /* HWImageHelperTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWImageHelperTests.m; sourceTree = "<group>"; };
+		D0B0000218BCA10000000000 /* HardwareGrowlerTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "HardwareGrowlerTests-Info.plist"; sourceTree = "<group>"; };
+		D0B0000318BCA10000000000 /* HardwareGrowlerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HardwareGrowlerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0B0000518BCA10000000000 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		D0B0001118BCA10000000000 /* HWNetworkMonitorUtilitiesTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWNetworkMonitorUtilitiesTests.m; sourceTree = "<group>"; };
+		D0B0001318BCA10000000000 /* HWNetworkMonitorUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HWNetworkMonitorUtilities.h; sourceTree = "<group>"; };
 		BCD47568156BCDD000F81910 /* ACImageAndTextCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ACImageAndTextCell.h; path = ../../../Common/Source/ACImageAndTextCell.h; sourceTree = "<group>"; };
 		BCD47569156BCDD000F81910 /* ACImageAndTextCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ACImageAndTextCell.m; path = ../../../Common/Source/ACImageAndTextCell.m; sourceTree = "<group>"; };
 		BCE3BC1A15C9619000B0BFFB /* TMSliderControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TMSliderControl.h; path = ../../../external_dependencies/tmslidercontrol/TMSliderControl.h; sourceTree = "<group>"; };
@@ -571,7 +603,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BC523C231555686000548427 /* Cocoa.framework in Frameworks */,
+				BC523C231555686000548427 /* AppKit.framework in Frameworks */,
 				BC523C3715556BFA00548427 /* IOKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -580,7 +612,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BC5BF7EC15752CEF0088443E /* Cocoa.framework in Frameworks */,
+				BC5BF7EC15752CEF0088443E /* AppKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -588,7 +620,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BC75524F156528AA00CB0542 /* Cocoa.framework in Frameworks */,
+				BC75524F156528AA00CB0542 /* AppKit.framework in Frameworks */,
 				BC75527015652BB100CB0542 /* IOKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -597,7 +629,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BCA26B5E155585C0009C5ABC /* Cocoa.framework in Frameworks */,
+				BCA26B5E155585C0009C5ABC /* AppKit.framework in Frameworks */,
 				BCA26B7215558853009C5ABC /* IOBluetooth.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -606,7 +638,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BCA26B881555B3F5009C5ABC /* Cocoa.framework in Frameworks */,
+				BCA26B881555B3F5009C5ABC /* AppKit.framework in Frameworks */,
 				BCA26BAE1555BA11009C5ABC /* IOKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -615,7 +647,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BCA26BB41555BB1B009C5ABC /* Cocoa.framework in Frameworks */,
+				BCA26BB41555BB1B009C5ABC /* AppKit.framework in Frameworks */,
 				BCAA1778155804A000D9E4ED /* IOKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -625,8 +657,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				BCE3BC2915C9640700B0BFFB /* QuartzCore.framework in Frameworks */,
-				BCB805EC155153330088C69A /* Cocoa.framework in Frameworks */,
-				BCB806991551597C0088C69A /* Growl.framework in Frameworks */,
+				BCB805EC155153330088C69A /* AppKit.framework in Frameworks */,
+				D0A0000818BCA00000000000 /* UserNotifications.framework in Frameworks */,
 				BCB8070815517EE90088C69A /* ServiceManagement.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -635,7 +667,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BCB806B015515C4E0088C69A /* Cocoa.framework in Frameworks */,
+				BCB806B015515C4E0088C69A /* AppKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -643,9 +675,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BCE06FFB178CCAA700D7839A /* Growl.framework in Frameworks */,
-				BCB807481551A6EA0088C69A /* Cocoa.framework in Frameworks */,
+				BCB807481551A6EA0088C69A /* AppKit.framework in Frameworks */,
 				BCECA3681552D22100F49280 /* SystemConfiguration.framework in Frameworks */,
+				D0A0001618BCA00000000000 /* CoreWLAN.framework in Frameworks */,
+				D0A0001818BCA00000000000 /* CoreLocation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -653,7 +686,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BCE83C6615804D2C005570DD /* Cocoa.framework in Frameworks */,
+				BCE83C6615804D2C005570DD /* AppKit.framework in Frameworks */,
 				BCE83C781580580C005570DD /* IOBluetooth.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -662,7 +695,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BCECA38D155322D200F49280 /* Cocoa.framework in Frameworks */,
+				BCECA38D155322D200F49280 /* AppKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -670,7 +703,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BCF6236A156878CC00AB4676 /* Cocoa.framework in Frameworks */,
+				BCF6236A156878CC00AB4676 /* AppKit.framework in Frameworks */,
+				D0A0001418BCA00000000000 /* OSLog.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D0B0000918BCA10000000000 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0B0000718BCA10000000000 /* AppKit.framework in Frameworks */,
+				D0B0000618BCA10000000000 /* XCTest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -929,6 +972,7 @@
 			children = (
 				BCB8069F15515A0D0088C69A /* Xcconfigs */,
 				BCB805F1155153330088C69A /* HardwareGrowler */,
+				D0B0001018BCA10000000000 /* HardwareGrowlerTests */,
 				BCB806B115515C4E0088C69A /* HardwareGrowlerLauncher */,
 				BCB8076C1551A78D0088C69A /* Plugins */,
 				BCB805EA155153330088C69A /* Frameworks */,
@@ -951,6 +995,7 @@
 				BCF62369156878CC00AB4676 /* TimeMachineMonitor.hwgrowlmonitor */,
 				BC5BF7EB15752CEF0088443E /* KeyboardMonitor.hwgrowlmonitor */,
 				BCE83C6515804D2C005570DD /* PhoneMonitor.hwgrowlmonitor */,
+				D0B0000318BCA10000000000 /* HardwareGrowlerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -958,7 +1003,6 @@
 		BCB805EA155153330088C69A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				BCB805EB155153330088C69A /* Cocoa.framework */,
 				BCB805ED155153330088C69A /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -967,9 +1011,14 @@
 		BCB805ED155153330088C69A /* Other Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D0A0000718BCA00000000000 /* UserNotifications.framework */,
+				D0A0001318BCA00000000000 /* OSLog.framework */,
+				D0A0001518BCA00000000000 /* CoreWLAN.framework */,
+				D0A0001718BCA00000000000 /* CoreLocation.framework */,
 				BCE3BC2815C9640600B0BFFB /* QuartzCore.framework */,
 				BCB805EE155153330088C69A /* AppKit.framework */,
 				BCB805F0155153330088C69A /* Foundation.framework */,
+				D0B0000518BCA10000000000 /* XCTest.framework */,
 				BCB8070615517EE10088C69A /* ServiceManagement.framework */,
 				BCECA3661552D1FA00F49280 /* SystemConfiguration.framework */,
 				BCECA38E155322D200F49280 /* CoreData.framework */,
@@ -987,6 +1036,10 @@
 				BCB805FE155153330088C69A /* AppDelegate.m */,
 				BCB8076D1551A82A0088C69A /* HWGrowlPluginController.h */,
 				BCB8076E1551A82A0088C69A /* HWGrowlPluginController.m */,
+				D0A0000118BCA00000000000 /* HWNotificationAdapter.h */,
+				D0A0000218BCA00000000000 /* HWNotificationAdapter.m */,
+				D0A0000418BCA00000000000 /* HWLoginItemController.h */,
+				D0A0000518BCA00000000000 /* HWLoginItemController.m */,
 				BCB807701551AB500088C69A /* External */,
 				BCB805F2155153330088C69A /* Supporting Files */,
 			);
@@ -1016,8 +1069,8 @@
 				BC5BF80315754ABF0088443E /* NotificationIcons */,
 				BC9757A9156C2D2B0080CF24 /* BundleIcons */,
 				BCB80611155154CA0088C69A /* HWGrowler.icns */,
-				BCB80612155154CA0088C69A /* menubarIcon_Normal.png */,
-				BCB80613155154CA0088C69A /* menubarIcon_Selected.png */,
+				D0B0001618BCA10000000000 /* menubarIconTemplate.png */,
+				D0B0001718BCA10000000000 /* menubarIconTemplate.svg */,
 			);
 			name = Images;
 			sourceTree = "<group>";
@@ -1027,7 +1080,6 @@
 			children = (
 				BCB8066F155158DA0088C69A /* Growl.app */,
 				BCB80671155158DA0088C69A /* GrowlLauncher.app */,
-				BCB80673155158DA0088C69A /* Growl.framework */,
 				BCB80675155158DA0088C69A /* GrowlPlugins.framework */,
 				BCB80677155158DA0088C69A /* Speech.growlView */,
 				BCB80679155158DA0088C69A /* Brushed.growlView */,
@@ -1079,11 +1131,22 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		D0B0001018BCA10000000000 /* HardwareGrowlerTests */ = {
+			isa = PBXGroup;
+			children = (
+				D0B0000118BCA10000000000 /* HWImageHelperTests.m */,
+				D0B0001118BCA10000000000 /* HWNetworkMonitorUtilitiesTests.m */,
+				D0B0000218BCA10000000000 /* HardwareGrowlerTests-Info.plist */,
+			);
+			path = HardwareGrowlerTests;
+			sourceTree = "<group>";
+		};
 		BCB8074A1551A6EA0088C69A /* NetworkMonitor */ = {
 			isa = PBXGroup;
 			children = (
 				BCB807681551A7510088C69A /* HWGrowlNetworkMonitor.h */,
 				BCB807691551A7510088C69A /* HWGrowlNetworkMonitor.m */,
+				D0B0001318BCA10000000000 /* HWNetworkMonitorUtilities.h */,
 				BCECA3621552D1C500F49280 /* NSStringAdditions.h */,
 				BCECA3631552D1C500F49280 /* NSStringAdditions.m */,
 				BCECA3691552D24C00F49280 /* GrowlNetworkUtilities.h */,
@@ -1335,13 +1398,10 @@
 				93B9584016B4E93B00C85136 /* pt-BR link to pt */,
 				BCB807661551A6F40088C69A /* Copy Plugins */,
 				BCB806D015515D740088C69A /* Copy Launcher */,
-				BCB806961551591C0088C69A /* Growl XPC */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				BCB80690155158F50088C69A /* PBXTargetDependency */,
-				BCB8068E155158EF0088C69A /* PBXTargetDependency */,
 				BCB806CF15515D700088C69A /* PBXTargetDependency */,
 				BC5BF7FC15752F8B0088443E /* PBXTargetDependency */,
 				BCAA17661557857C00D9E4ED /* PBXTargetDependency */,
@@ -1350,6 +1410,9 @@
 				BC523C3315556B4500548427 /* PBXTargetDependency */,
 				BCECA3AD155325CC00F49280 /* PBXTargetDependency */,
 				BCB807651551A6F10088C69A /* PBXTargetDependency */,
+				D0A0000E18BCA00000000000 /* PBXTargetDependency */,
+				D0A0000F18BCA00000000000 /* PBXTargetDependency */,
+				D0A0001218BCA00000000000 /* PBXTargetDependency */,
 			);
 			name = HardwareGrowler;
 			productName = HardwareGrowler;
@@ -1441,6 +1504,22 @@
 			productReference = BCF62369156878CC00AB4676 /* TimeMachineMonitor.hwgrowlmonitor */;
 			productType = "com.apple.product-type.bundle";
 		};
+		D0B0000B18BCA10000000000 /* HardwareGrowlerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D0B0000F18BCA10000000000 /* Build configuration list for PBXNativeTarget "HardwareGrowlerTests" */;
+			buildPhases = (
+				D0B0000818BCA10000000000 /* Sources */,
+				D0B0000918BCA10000000000 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HardwareGrowlerTests;
+			productName = HardwareGrowlerTests;
+			productReference = D0B0000318BCA10000000000 /* HardwareGrowlerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1509,6 +1588,7 @@
 				BCF62368156878CC00AB4676 /* TimeMachineMonitor */,
 				BC5BF7EA15752CEF0088443E /* KeyboardMonitor */,
 				BCE83C6415804D2C005570DD /* PhoneMonitor */,
+				D0B0000B18BCA10000000000 /* HardwareGrowlerTests */,
 			);
 		};
 /* End PBXProject section */
@@ -1526,13 +1606,6 @@
 			fileType = wrapper.application;
 			path = GrowlLauncher.app;
 			remoteRef = BCB80670155158DA0088C69A /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		BCB80673155158DA0088C69A /* Growl.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = Growl.framework;
-			remoteRef = BCB80672155158DA0088C69A /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		BCB80675155158DA0088C69A /* GrowlPlugins.framework */ = {
@@ -1680,8 +1753,7 @@
 				BCB805F6155153330088C69A /* InfoPlist.strings in Resources */,
 				BCB805FC155153330088C69A /* Credits.rtf in Resources */,
 				BCB8061D155154CA0088C69A /* HWGrowler.icns in Resources */,
-				BCB8061E155154CA0088C69A /* menubarIcon_Normal.png in Resources */,
-				BCB8061F155154CA0088C69A /* menubarIcon_Selected.png in Resources */,
+				D0B0001818BCA10000000000 /* menubarIconTemplate.png in Resources */,
 				BC4FC623155C04B700EE65EC /* MainMenu.xib in Resources */,
 				BC006C3215AB004900643FA8 /* HWGPrefsBluetooth.tif in Resources */,
 				BC006C3315AB004900643FA8 /* HWGPrefsCapster.tif in Resources */,
@@ -1732,14 +1804,6 @@
 				BC006CAE15AB161800643FA8 /* TimeMachine-Failed.tif in Resources */,
 				BC006CAF15AB161800643FA8 /* TimeMachine-Off.tif in Resources */,
 				BC006CB015AB161800643FA8 /* TimeMachine-On.tif in Resources */,
-				BCE3BC2115C961A500B0BFFB /* OverlayMask.png in Resources */,
-				BCE3BC2215C961A500B0BFFB /* SliderHandle.png in Resources */,
-				BCE3BC2315C961A500B0BFFB /* SliderHandleDown.png in Resources */,
-				BCE3BC2415C961A500B0BFFB /* SliderWell.png in Resources */,
-				BC79898615E936BF00CDC5A0 /* OverlayMask@2x.png in Resources */,
-				BC79898715E936BF00CDC5A0 /* SliderHandle@2x.png in Resources */,
-				BC79898815E936BF00CDC5A0 /* SliderHandleDown@2x.png in Resources */,
-				BC79898915E936BF00CDC5A0 /* SliderWell@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1799,6 +1863,7 @@
 			);
 			name = "pt-BR link to pt";
 			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/pt.lproj",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/usr/bin/env ruby";
@@ -1893,6 +1958,8 @@
 			files = (
 				BCB805F8155153330088C69A /* main.m in Sources */,
 				BCB805FF155153330088C69A /* AppDelegate.m in Sources */,
+				D0A0000318BCA00000000000 /* HWNotificationAdapter.m in Sources */,
+				D0A0000618BCA00000000000 /* HWLoginItemController.m in Sources */,
 				BCB806F8155178340088C69A /* GrowlOnSwitch.m in Sources */,
 				BCB8076F1551A82B0088C69A /* HWGrowlPluginController.m in Sources */,
 				BCD4756A156BCDD000F81910 /* ACImageAndTextCell.m in Sources */,
@@ -1916,6 +1983,7 @@
 			files = (
 				BCB8076A1551A7510088C69A /* HWGrowlNetworkMonitor.m in Sources */,
 				BCECA3651552D1D300F49280 /* NSStringAdditions.m in Sources */,
+				D0A0000918BCA00000000000 /* GrowlNetworkUtilities.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1940,6 +2008,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				BCF6237C15687B2E00AB4676 /* HWGrowlTimeMachineMonitor.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D0B0000818BCA10000000000 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0B0000418BCA10000000000 /* HWImageHelperTests.m in Sources */,
+				D0B0001218BCA10000000000 /* HWNetworkMonitorUtilitiesTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1976,11 +2053,6 @@
 			name = GNTPClientService;
 			targetProxy = BCB8068D155158EF0088C69A /* PBXContainerItemProxy */;
 		};
-		BCB80690155158F50088C69A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = Growl.framework;
-			targetProxy = BCB8068F155158F50088C69A /* PBXContainerItemProxy */;
-		};
 		BCB806CF15515D700088C69A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BCB806AD15515C4E0088C69A /* HardwareGrowlerLauncher */;
@@ -1995,6 +2067,21 @@
 			isa = PBXTargetDependency;
 			target = BCECA38B155322D200F49280 /* VolumeMonitor */;
 			targetProxy = BCECA3AC155325CC00F49280 /* PBXContainerItemProxy */;
+		};
+		D0A0000E18BCA00000000000 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BC75524D156528AA00CB0542 /* ThunderboltMonitor */;
+			targetProxy = D0A0000C18BCA00000000000 /* PBXContainerItemProxy */;
+		};
+		D0A0000F18BCA00000000000 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BCF62368156878CC00AB4676 /* TimeMachineMonitor */;
+			targetProxy = D0A0000D18BCA00000000000 /* PBXContainerItemProxy */;
+		};
+		D0A0001218BCA00000000000 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BCE83C6415804D2C005570DD /* PhoneMonitor */;
+			targetProxy = D0A0001118BCA00000000000 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -2166,7 +2253,7 @@
 				INFOPLIST_FILE = "USBMonitor/USBMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2182,7 +2269,7 @@
 				INFOPLIST_FILE = "USBMonitor/USBMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2198,7 +2285,7 @@
 				INFOPLIST_FILE = "USBMonitor/USBMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2214,7 +2301,7 @@
 				INFOPLIST_FILE = "KeyboardMonitor/KeyboardMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2230,7 +2317,7 @@
 				INFOPLIST_FILE = "KeyboardMonitor/KeyboardMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2246,7 +2333,7 @@
 				INFOPLIST_FILE = "KeyboardMonitor/KeyboardMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2262,7 +2349,7 @@
 				INFOPLIST_FILE = "ThunderboltMonitor/ThunderboltMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2278,7 +2365,7 @@
 				INFOPLIST_FILE = "ThunderboltMonitor/ThunderboltMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2294,7 +2381,7 @@
 				INFOPLIST_FILE = "ThunderboltMonitor/ThunderboltMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2311,7 +2398,7 @@
 				INFOPLIST_FILE = "BluetoothMonitor/BluetoothMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2328,7 +2415,7 @@
 				INFOPLIST_FILE = "BluetoothMonitor/BluetoothMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2345,7 +2432,7 @@
 				INFOPLIST_FILE = "BluetoothMonitor/BluetoothMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2361,7 +2448,7 @@
 				INFOPLIST_FILE = "FirewireMonitor/FirewireMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2377,7 +2464,7 @@
 				INFOPLIST_FILE = "FirewireMonitor/FirewireMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2393,7 +2480,7 @@
 				INFOPLIST_FILE = "FirewireMonitor/FirewireMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2409,7 +2496,7 @@
 				INFOPLIST_FILE = "PowerMonitor/PowerMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WARNING_CFLAGS = (
 					"-Wall",
@@ -2439,7 +2526,7 @@
 				INFOPLIST_FILE = "PowerMonitor/PowerMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WARNING_CFLAGS = (
 					"-Wall",
@@ -2469,7 +2556,7 @@
 				INFOPLIST_FILE = "PowerMonitor/PowerMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WARNING_CFLAGS = (
 					"-Wall",
@@ -2493,7 +2580,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2509,7 +2596,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				ONLY_ACTIVE_ARCH = YES;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = macosx;
@@ -2520,7 +2607,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -2530,7 +2617,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = macosx;
 			};
@@ -2540,7 +2627,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BC3530AF155C1402005D2EA2 /* Debug.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				CODE_SIGN_ENTITLEMENTS = HardwareGrowler/HardwareGrowler.entitlements;
 				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2548,7 +2635,8 @@
 				GCC_PREFIX_HEADER = "HardwareGrowler/HardwareGrowler-Prefix.pch";
 				INFOPLIST_FILE = "HardwareGrowler/HardwareGrowler-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.growl.hardwaregrowler;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
@@ -2559,7 +2647,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BC3530B1155C1402005D2EA2 /* Release.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				CODE_SIGN_ENTITLEMENTS = HardwareGrowler/HardwareGrowler.entitlements;
 				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2567,7 +2655,8 @@
 				GCC_PREFIX_HEADER = "HardwareGrowler/HardwareGrowler-Prefix.pch";
 				INFOPLIST_FILE = "HardwareGrowler/HardwareGrowler-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.growl.hardwaregrowler;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
@@ -2578,7 +2667,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2594,7 +2683,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				ONLY_ACTIVE_ARCH = YES;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = macosx;
@@ -2605,7 +2694,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BC3530B0155C1402005D2EA2 /* Localization.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				CODE_SIGN_ENTITLEMENTS = HardwareGrowler/HardwareGrowler.entitlements;
 				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2613,7 +2702,8 @@
 				GCC_PREFIX_HEADER = "HardwareGrowler/HardwareGrowler-Prefix.pch";
 				INFOPLIST_FILE = "HardwareGrowler/HardwareGrowler-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.growl.hardwaregrowler;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
@@ -2624,7 +2714,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BC3530AF155C1402005D2EA2 /* Debug.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				CODE_SIGN_ENTITLEMENTS = HardwareGrowlerLauncher/HardwareGrowlerLauncher.entitlements;
 				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2632,7 +2722,8 @@
 				GCC_PREFIX_HEADER = "HardwareGrowlerLauncher/HardwareGrowlerLauncher-Prefix.pch";
 				INFOPLIST_FILE = "HardwareGrowlerLauncher/HardwareGrowlerLauncher-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.growl.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
@@ -2643,7 +2734,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BC3530B0155C1402005D2EA2 /* Localization.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				CODE_SIGN_ENTITLEMENTS = HardwareGrowlerLauncher/HardwareGrowlerLauncher.entitlements;
 				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2651,7 +2742,8 @@
 				GCC_PREFIX_HEADER = "HardwareGrowlerLauncher/HardwareGrowlerLauncher-Prefix.pch";
 				INFOPLIST_FILE = "HardwareGrowlerLauncher/HardwareGrowlerLauncher-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.growl.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
@@ -2662,7 +2754,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BC3530B1155C1402005D2EA2 /* Release.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				CODE_SIGN_ENTITLEMENTS = HardwareGrowlerLauncher/HardwareGrowlerLauncher.entitlements;
 				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2670,7 +2762,8 @@
 				GCC_PREFIX_HEADER = "HardwareGrowlerLauncher/HardwareGrowlerLauncher-Prefix.pch";
 				INFOPLIST_FILE = "HardwareGrowlerLauncher/HardwareGrowlerLauncher-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.growl.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
@@ -2687,11 +2780,7 @@
 				INFOPLIST_FILE = "NetworkMonitor/NetworkMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				OTHER_LDFLAGS = (
-					"-framework",
-					Growl,
-				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2707,11 +2796,7 @@
 				INFOPLIST_FILE = "NetworkMonitor/NetworkMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				OTHER_LDFLAGS = (
-					"-framework",
-					Growl,
-				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2727,11 +2812,7 @@
 				INFOPLIST_FILE = "NetworkMonitor/NetworkMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				OTHER_LDFLAGS = (
-					"-framework",
-					Growl,
-				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2748,7 +2829,7 @@
 				INFOPLIST_FILE = "PhoneMonitor/PhoneMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2765,7 +2846,7 @@
 				INFOPLIST_FILE = "PhoneMonitor/PhoneMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2782,7 +2863,7 @@
 				INFOPLIST_FILE = "PhoneMonitor/PhoneMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2798,7 +2879,7 @@
 				INFOPLIST_FILE = "VolumeMonitor/VolumeMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2814,7 +2895,7 @@
 				INFOPLIST_FILE = "VolumeMonitor/VolumeMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2830,7 +2911,7 @@
 				INFOPLIST_FILE = "VolumeMonitor/VolumeMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2846,7 +2927,7 @@
 				INFOPLIST_FILE = "TimeMachineMonitor/TimeMachineMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2862,7 +2943,7 @@
 				INFOPLIST_FILE = "TimeMachineMonitor/TimeMachineMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
 			};
@@ -2878,9 +2959,86 @@
 				INFOPLIST_FILE = "TimeMachineMonitor/TimeMachineMonitor-Info.plist";
 				INFOPLIST_PREFIX_HEADER = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = hwgrowlmonitor;
+			};
+			name = Release;
+		};
+		D0B0000C18BCA10000000000 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BC3530AF155C1402005D2EA2 /* Debug.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				BUNDLE_LOADER = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "HardwareGrowlerTests/HardwareGrowlerTests-Info.plist";
+				INFOPLIST_PREFIX_HEADER = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.growl.hardwaregrowler.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = macosx;
+				TEST_HOST = "";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		D0B0000D18BCA10000000000 /* Localization */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BC3530B0155C1402005D2EA2 /* Localization.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				BUNDLE_LOADER = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "HardwareGrowlerTests/HardwareGrowlerTests-Info.plist";
+				INFOPLIST_PREFIX_HEADER = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.growl.hardwaregrowler.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = macosx;
+				TEST_HOST = "";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Localization;
+		};
+		D0B0000E18BCA10000000000 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BC3530B1155C1402005D2EA2 /* Release.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				BUNDLE_LOADER = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "HardwareGrowlerTests/HardwareGrowlerTests-Info.plist";
+				INFOPLIST_PREFIX_HEADER = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.growl.hardwaregrowler.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = macosx;
+				TEST_HOST = "";
+				WRAPPER_EXTENSION = xctest;
 			};
 			name = Release;
 		};
@@ -3013,6 +3171,16 @@
 				BCF62373156878CC00AB4676 /* Debug */,
 				BCF62374156878CC00AB4676 /* Localization */,
 				BCF62375156878CC00AB4676 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D0B0000F18BCA10000000000 /* Build configuration list for PBXNativeTarget "HardwareGrowlerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D0B0000C18BCA10000000000 /* Debug */,
+				D0B0000D18BCA10000000000 /* Localization */,
+				D0B0000E18BCA10000000000 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

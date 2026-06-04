@@ -22,7 +22,7 @@
 	static NSImage *_ejectIconImage = nil;
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
-		_ejectIconImage = [[NSImage imageNamed:@"DisksVolumes-Eject"] retain];
+		_ejectIconImage = [HWGSystemSymbolImage(@"eject", @"DisksVolumes-Eject") retain];
 	});
 	return _ejectIconImage;
 }
@@ -31,11 +31,7 @@
 	static NSData *_mountIconData = nil;
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
-        NSArray *representations = [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericRemovableMediaIcon)] representations];
-        NSBitmapImageRep *bitmapRep = [representations objectAtIndex:0U];
-
-		_mountIconData = [bitmapRep representationUsingType: NSPNGFileType
-                                                 properties: nil];
+		_mountIconData = [HWGPNGDataForSystemSymbol(@"externaldrive", nil) retain];
 	});
 	return _mountIconData;
 }
@@ -50,15 +46,7 @@
 
 - (id) initForMountWithPath:(NSString *)aPath {
 	if ((self = [self initWithPath:aPath])) {
-		if (path) {
-            NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFile:path];
-            CGImageRef iconRef = [icon CGImageForProposedRect:nil context:nil hints:nil];
-            NSBitmapImageRep *bitmapRep = [[[NSBitmapImageRep alloc] initWithCGImage:iconRef] autorelease];
-			self.iconData = [bitmapRep representationUsingType: NSPNGFileType
-                                                      properties: nil];
-		} else {
-			self.iconData = [VolumeInfo mountIconData];
-		}
+		self.iconData = [VolumeInfo mountIconData];
 	}
 	
 	return self;
@@ -66,33 +54,7 @@
 
 - (id) initForUnmountWithPath:(NSString *)aPath {
 	if ((self = [self initWithPath:aPath])) {
-		if (path) {
-			//Get the icon for the volume.
-			NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFile:path];
-			NSSize iconSize = [icon size];
-			//Also get the standard Eject icon.
-			NSImage *ejectIcon = [VolumeInfo ejectIconImage];
-			[ejectIcon setScalesWhenResized:NO]; //Use the high-res rep instead.
-			NSSize ejectIconSize = [ejectIcon size];
-			
-			//Badge the volume icon with the Eject icon. This is what we'll pass off te Growl.
-			//The badge's width and height are 2/3 of the overall icon's width and height. If they were 1/2, it would look small (so I found in testing —boredzo). This looks pretty good.
-			[icon lockFocus];
-			
-			[ejectIcon drawInRect:CGRectMake(0.0f, 0.0f, iconSize.width, iconSize.width)
-							 fromRect:(NSRect){ NSZeroPoint, ejectIconSize }
-							operation:NSCompositeSourceOver
-							 fraction:1.0f];
-			
-			//For some reason, passing [icon TIFFRepresentation] only passes the unbadged volume icon to Growl, even though writing the same TIFF data out to a file and opening it in Preview does show the badge. If anybody can figure that out, you're welcome to do so. Until then:
-			//We get a NSBIR for the current focused view (the image), and make PNG data from it. (There is no reason why this could not be TIFF if we wanted it to be. I just generally prefer PNG. —boredzo)
-			NSBitmapImageRep *imageRep = [[[NSBitmapImageRep alloc] initWithFocusedViewRect:(NSRect){ NSZeroPoint, iconSize }] autorelease];
-			self.iconData = [imageRep representationUsingType:NSPNGFileType properties:nil];
-			
-			[icon unlockFocus];
-		} else {
-			self.iconData = [[[[VolumeInfo ejectIconImage] representations] objectAtIndex:0U]representationUsingType:NSPNGFileType properties:nil];
-		}
+		self.iconData = HWGPNGDataForSystemSymbol(@"externaldrive", nil);
 	}
 	
 	return self;
@@ -146,6 +108,10 @@
 @property (nonatomic, assign) IBOutlet NSArrayController *arrayController;
 @property (nonatomic, assign) IBOutlet NSTableView *tableView;
 
+- (BOOL)shouldOpenMountedVolumeInFinder:(VolumeInfo *)volume;
+- (BOOL)boolResourceValueForURL:(NSURL *)url key:(NSURLResourceKey)key defaultValue:(BOOL)defaultValue;
+- (void)modernizePreferencePane;
+
 @end
 
 @implementation HWGrowlVolumeMonitor
@@ -160,22 +126,13 @@
 -(id)init {
 	if((self = [super init])){
 		self.ejectCache = [NSMutableDictionary dictionary];
-		
-		NSNotificationCenter *center = [[NSWorkspace sharedWorkspace] notificationCenter];
-		
-		[center addObserver:self selector:@selector(volumeDidMount:) name:NSWorkspaceDidMountNotification object:nil];
-		//Note that we must use both WILL and DID unmount, so we can only get the volume's icon before the volume has finished unmounting.
-		//The icon and data is stored during WILL unmount, and then displayed during DID unmount.
-		[center addObserver:self selector:@selector(volumeDidUnmount:) name:NSWorkspaceDidUnmountNotification object:nil];
-		[center addObserver:self selector:@selector(volumeWillUnmount:) name:NSWorkspaceWillUnmountNotification object:nil];
-		
 		self.ignoredVolumeColumnTitle = NSLocalizedString(@"Ignored Drives:", @"Title for colum in table of ignored volumes");
 	}
 	return self;
 }
 
 - (void)dealloc {
-	[[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
+	[self stopObserving];
 	
 	[ejectCache enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
 		[[obj objectAtIndex:VolumeEjectCacheTimerIndex] invalidate];
@@ -184,10 +141,28 @@
 	[ejectCache release];
 	ejectCache = nil;
 	
-    [_ignoredVolumeColumnTitle release];
-	_ignoredVolumeColumnTitle = nil;
+	    [_ignoredVolumeColumnTitle release];
+		_ignoredVolumeColumnTitle = nil;
+	
+	[prefsView release];
+	prefsView = nil;
 
 	[super dealloc];
+}
+
+- (void)startObserving {
+	NSNotificationCenter *center = [[NSWorkspace sharedWorkspace] notificationCenter];
+	[center removeObserver:self];
+	
+	[center addObserver:self selector:@selector(volumeDidMount:) name:NSWorkspaceDidMountNotification object:nil];
+	//Note that we must use both WILL and DID unmount, so we can only get the volume's icon before the volume has finished unmounting.
+	//The icon and data is stored during WILL unmount, and then displayed during DID unmount.
+	[center addObserver:self selector:@selector(volumeDidUnmount:) name:NSWorkspaceDidUnmountNotification object:nil];
+	[center addObserver:self selector:@selector(volumeWillUnmount:) name:NSWorkspaceWillUnmountNotification object:nil];
+}
+
+- (void)stopObserving {
+	[[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
 }
 
 - (void) sendMountNotificationForVolume:(VolumeInfo*)volume mounted:(BOOL)mounted {
@@ -218,16 +193,46 @@
 	if(found)
 		return;
 	
-	NSString *context = mounted ? [volume path] : nil;
+	NSString *context = (mounted && [self shouldOpenMountedVolumeInFinder:volume]) ? [volume path] : nil;
 	NSString *type = mounted ? @"VolumeMounted" : @"VolumeUnmounted";
 	NSString *title = [NSString stringWithFormat:@"%@ %@", [volume name], mounted ? NSLocalizedString(@"Mounted", @"") : NSLocalizedString(@"Unmounted", @"")];
 	[delegate notifyWithName:type
 							 title:title
-					 description:mounted ? NSLocalizedString(@"Click to open", @"Message body on a volume mount notification, clicking it opens the drive in finder") : nil
+					 description:[context length] ? NSLocalizedString(@"Click to open", @"Message body on a volume mount notification, clicking it opens the drive in finder") : nil
 							  icon:[volume iconData]
 			  identifierString:[volume path]
 				  contextString:context 
 							plugin:self];
+}
+
+- (BOOL)shouldOpenMountedVolumeInFinder:(VolumeInfo *)volume
+{
+	NSString *path = [volume path];
+	if (![path hasPrefix:@"/Volumes/"])
+		return NO;
+	
+	NSURL *url = [NSURL fileURLWithPath:path isDirectory:YES];
+	BOOL hidden = [self boolResourceValueForURL:url key:NSURLIsHiddenKey defaultValue:NO];
+	BOOL browsable = [self boolResourceValueForURL:url key:NSURLVolumeIsBrowsableKey defaultValue:YES];
+	BOOL local = [self boolResourceValueForURL:url key:NSURLVolumeIsLocalKey defaultValue:YES];
+	BOOL internal = [self boolResourceValueForURL:url key:NSURLVolumeIsInternalKey defaultValue:NO];
+	BOOL ejectable = [self boolResourceValueForURL:url key:NSURLVolumeIsEjectableKey defaultValue:NO];
+	BOOL removable = [self boolResourceValueForURL:url key:NSURLVolumeIsRemovableKey defaultValue:NO];
+	BOOL automounted = [self boolResourceValueForURL:url key:NSURLVolumeIsAutomountedKey defaultValue:NO];
+	
+	if (hidden || !browsable || !local || automounted)
+		return NO;
+	
+	return ejectable || removable || !internal;
+}
+
+- (BOOL)boolResourceValueForURL:(NSURL *)url key:(NSURLResourceKey)key defaultValue:(BOOL)defaultValue
+{
+	NSNumber *value = nil;
+	NSError *error = nil;
+	if (![url getResourceValue:&value forKey:key error:&error] || !value)
+		return defaultValue;
+	return [value boolValue];
 }
 
 - (void) staleEjectItemTimerFired:(NSTimer *)theTimer {
@@ -296,6 +301,52 @@
    }
 }
 
+- (void)modernizePreferencePane {
+	NSScrollView *scrollView = [self.tableView enclosingScrollView];
+	NSClipView *clipView = [scrollView contentView];
+	
+	if (![self.tableView headerView]) {
+		NSTableHeaderView *headerView = [[[NSTableHeaderView alloc] initWithFrame:NSMakeRect(0.0, 0.0, NSWidth([self.tableView frame]), 22.0)] autorelease];
+		[headerView setAutoresizingMask:NSViewWidthSizable];
+		[self.tableView setHeaderView:headerView];
+	}
+	
+	[self.tableView setRowHeight:24.0];
+	[self.tableView setIntercellSpacing:NSMakeSize(3.0, 2.0)];
+	[self.tableView setUsesAlternatingRowBackgroundColors:NO];
+	[self.tableView setSelectionHighlightStyle:NSTableViewSelectionHighlightStyleRegular];
+	[self.tableView setBackgroundColor:[NSColor textBackgroundColor]];
+	[self.tableView setGridStyleMask:NSTableViewSolidHorizontalGridLineMask];
+	[self.tableView setGridColor:[NSColor separatorColor]];
+	
+	for (NSTableColumn *column in [self.tableView tableColumns]) {
+		[[column headerCell] setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize] weight:NSFontWeightMedium]];
+		[[column headerCell] setTextColor:[NSColor secondaryLabelColor]];
+		NSCell *cell = [column dataCell];
+		if ([cell respondsToSelector:@selector(setFont:)])
+			[(id)cell setFont:[NSFont systemFontOfSize:13.0]];
+		if ([cell respondsToSelector:@selector(setTextColor:)])
+			[(id)cell setTextColor:[NSColor controlTextColor]];
+		if ([cell respondsToSelector:@selector(setBackgroundColor:)])
+			[(id)cell setBackgroundColor:[NSColor textBackgroundColor]];
+	}
+	
+	[scrollView setBorderType:NSBezelBorder];
+	[scrollView setDrawsBackground:YES];
+	[scrollView setBackgroundColor:[NSColor textBackgroundColor]];
+	[clipView setDrawsBackground:YES];
+	[clipView setBackgroundColor:[NSColor textBackgroundColor]];
+	
+	for (NSView *subview in [prefsView subviews]) {
+		if ([subview isKindOfClass:[NSButton class]]) {
+			NSButton *button = (NSButton *)subview;
+			[button setBezelStyle:NSBezelStyleTexturedRounded];
+			[button setBordered:YES];
+			[[button cell] setImagePosition:NSImageOnly];
+		}
+	}
+}
+
 -(IBAction)addVolumeEntry:(id)sender {
    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
    [self.arrayController addObject:dict];
@@ -324,6 +375,7 @@
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
 		[NSBundle loadNibNamed:@"VolumeMonitorPrefs" owner:self];
+		[self modernizePreferencePane];
 	});
 	return prefsView;
 }
@@ -353,8 +405,14 @@
 	}];
 }
 -(void)noteClosed:(NSString*)contextString byClick:(BOOL)clicked {
-	if(clicked)
-		[[NSWorkspace sharedWorkspace] openFile:contextString];
+	if(clicked && [contextString length]) {
+		if (![contextString hasPrefix:@"/Volumes/"])
+			return;
+		NSURL *volumeURL = [NSURL fileURLWithPath:contextString isDirectory:YES];
+		dispatch_async(dispatch_get_main_queue(), ^{
+			[[NSWorkspace sharedWorkspace] openURL:volumeURL];
+		});
+	}
 }
 
 @end

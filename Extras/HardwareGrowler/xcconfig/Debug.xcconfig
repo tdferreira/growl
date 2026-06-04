@@ -8,3 +8,6 @@
 
 #include "../../xcconfig/Debug.xcconfig"
 #include "Common.xcconfig"
+
+OTHER_CFLAGS =
+OTHER_CPLUSPLUSFLAGS =
