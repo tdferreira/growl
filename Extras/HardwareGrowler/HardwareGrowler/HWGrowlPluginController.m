@@ -77,6 +77,10 @@
 					if([plugin conformsToProtocol:@protocol(HWGrowlPluginProtocol)])
 					{
 						[plugin setDelegate:self];
+						if([plugin respondsToSelector:@selector(isAvailable)] && ![plugin isAvailable]) {
+							[plugin release];
+							return;
+						}
 						BOOL disabled = NO;
 						if(disabledPlugins && [disabledPlugins objectForKey:bundleID])
 							disabled = [[disabledPlugins objectForKey:bundleID] boolValue];

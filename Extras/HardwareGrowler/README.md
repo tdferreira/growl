@@ -10,6 +10,8 @@ This fork modernizes the original Growl-era application so it can be built on cu
 
 The main app, helper, and every plug-in must be built for compatible architectures. An arm64 app can only load arm64 plug-ins. A Universal 2 app should ship Universal 2 plug-ins.
 
+The app currently ships the actively supported monitors: USB, Bluetooth, Volume, Network, Power, Keyboard, Thunderbolt, TimeMachine, and FireWire. The legacy Phone monitor remains in the source tree, but is not embedded in the app by default. FireWire is hidden at runtime on Macs that do not expose FireWire IORegistry services.
+
 ## Requirements
 
 Required:
@@ -265,6 +267,8 @@ Expected prompts include:
 - Location, for Wi-Fi SSID access through CoreWLAN/CoreLocation.
 - Bluetooth, for Bluetooth monitoring.
 - Accessibility, only if the Keyboard Monitor is enabled and needs keyboard state access.
+
+FireWire availability is checked with a read-only IOKit/IORegistry query and should not require a special privacy permission.
 
 Permissions are tied to the app's bundle identifier and code signature. If you rebuild with a different signature or run the app from a different path, macOS may treat it as a different app. For the least surprising behavior, install it consistently at:
 

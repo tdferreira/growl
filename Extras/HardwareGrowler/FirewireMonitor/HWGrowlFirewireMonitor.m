@@ -26,6 +26,45 @@
 @synthesize ioKitNotificationPort;
 @synthesize notificationRunLoopSource;
 
+static BOOL HWGFireWireServiceExists(const char *serviceClassName)
+{
+	CFMutableDictionaryRef matchingDictionary = IOServiceMatching(serviceClassName);
+	if (!matchingDictionary)
+		return NO;
+	
+	io_service_t service = IOServiceGetMatchingService(kIOMasterPortDefault, matchingDictionary);
+	if (!service)
+		return NO;
+	
+	IOObjectRelease(service);
+	return YES;
+}
+
+static BOOL HWGFireWireHardwareAvailable(void)
+{
+	static BOOL checked = NO;
+	static BOOL available = NO;
+	if (checked)
+		return available;
+	
+	const char *serviceClassNames[] = {
+		"IOFireWireController",
+		"IOFireWireLocalNode",
+		"AppleFWOHCI",
+		NULL
+	};
+	
+	for (NSUInteger index = 0; serviceClassNames[index] != NULL; index++) {
+		if (HWGFireWireServiceExists(serviceClassNames[index])) {
+			available = YES;
+			break;
+		}
+	}
+	
+	checked = YES;
+	return available;
+}
+
 -(id)init {
 	if((self = [super init])){
 		self.notificationsArePrimed = NO;
@@ -42,7 +81,15 @@
 	[self startObserving];
 }
 
+-(BOOL)isAvailable {
+	return HWGFireWireHardwareAvailable();
+}
+
 -(void)startObserving {
+	if (![self isAvailable]) {
+		return;
+	}
+	
 	if (ioKitNotificationPort) {
 		return;
 	}

@@ -317,7 +317,6 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 									   NSLocalizedString(@"Watches legacy FireWire devices as they connect or disconnect.", @"FireWire module description"), @"HWGrowlFirewireMonitor",
 									   NSLocalizedString(@"Watches Caps Lock, Shift, and Fn key state changes.", @"Keyboard module description"), @"HWGrowlKeyboardMonitor",
 									   NSLocalizedString(@"Watches Wi-Fi, network interfaces, and IP address changes.", @"Network module description"), @"HWGrowlNetworkMonitor",
-									   NSLocalizedString(@"Watches legacy Bluetooth hands-free phone call and message events.", @"Phone module description"), @"HWGrowlPhoneMonitor",
 									   NSLocalizedString(@"Watches battery level, charging, and power source changes.", @"Power module description"), @"HWGrowlPowerMonitor",
 									   NSLocalizedString(@"Watches Thunderbolt devices as they connect or disconnect.", @"Thunderbolt module description"), @"HWGrowlThunderboltMonitor",
 									   NSLocalizedString(@"Watches Time Machine backup start, finish, cancel, and failure events.", @"Time Machine module description"), @"HWGrowlTimeMachineMonitor",
@@ -867,9 +866,9 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 												informativeTextWithFormat:NSLocalizedString(@"Enabling this option will cause HardwareGrowler to run without showing a dock icon or a menu item.\n\nTo access preferences, tap HardwareGrowler in Launchpad, or open HardwareGrowler in Finder.", nil)];
 					alert.showsSuppressionButton = YES;
 					NSInteger allow = [alert runModal];
-					if(allow == NSAlertDefaultReturn)
+					if(allow == NSAlertFirstButtonReturn)
 					{
-						if([[alert suppressionButton] state] == NSOnState){
+						if([[alert suppressionButton] state] == NSControlStateValueOn){
 							[[defaultController defaults] setBool:YES forKey:@"SuppressNoIconWarn"];
 						}
 						[self warnUserAboutIcons];
@@ -927,9 +926,9 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 											informativeTextWithFormat:NSLocalizedString(@"Allowing this will let HardwareGrowler launch everytime you login, so that it is available for applications which use it at all times", nil)];
 				alert.showsSuppressionButton = YES;
 				NSInteger allow = [alert runModal];
-				if(allow == NSAlertDefaultReturn)
+				if(allow == NSAlertFirstButtonReturn)
 				{
-					if([[alert suppressionButton] state] == NSOnState){
+					if([[alert suppressionButton] state] == NSControlStateValueOn){
 						[[defaultController defaults] setBool:YES forKey:@"SuppressStartAtLogin"];
 					}
 					[self setStartAtLogin:YES];
@@ -983,7 +982,6 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 								 @"cable.connector", @"HWGrowlFirewireMonitor",
 								 @"keyboard", @"HWGrowlKeyboardMonitor",
 								 @"network", @"HWGrowlNetworkMonitor",
-								 @"iphone", @"HWGrowlPhoneMonitor",
 								 @"battery.100", @"HWGrowlPowerMonitor",
 								 @"bolt.horizontal", @"HWGrowlThunderboltMonitor",
 								 @"clock.arrow.circlepath", @"HWGrowlTimeMachineMonitor",
@@ -995,7 +993,6 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 								   @"HWGPrefsFireWire", @"HWGrowlFirewireMonitor",
 								   @"HWGPrefsCapster", @"HWGrowlKeyboardMonitor",
 								   @"HWGPrefsNetwork", @"HWGrowlNetworkMonitor",
-								   @"HWGPrefsPhone", @"HWGrowlPhoneMonitor",
 								   @"HWGPrefsPower", @"HWGrowlPowerMonitor",
 								   @"HWGPrefsThunderbolt", @"HWGrowlThunderboltMonitor",
 								   @"HWGPrefsTimeMachine", @"HWGrowlTimeMachineMonitor",

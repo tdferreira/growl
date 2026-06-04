@@ -16,7 +16,6 @@
 		932173DE163A43F200D5790F /* PowerMonitor.hwgrowlmonitor in Copy Plugins */ = {isa = PBXBuildFile; fileRef = BCA26BB31555BB1A009C5ABC /* PowerMonitor.hwgrowlmonitor */; };
 		D0A0000A18BCA00000000000 /* ThunderboltMonitor.hwgrowlmonitor in Copy Plugins */ = {isa = PBXBuildFile; fileRef = BC75524E156528AA00CB0542 /* ThunderboltMonitor.hwgrowlmonitor */; };
 		D0A0000B18BCA00000000000 /* TimeMachineMonitor.hwgrowlmonitor in Copy Plugins */ = {isa = PBXBuildFile; fileRef = BCF62369156878CC00AB4676 /* TimeMachineMonitor.hwgrowlmonitor */; };
-		D0A0001018BCA00000000000 /* PhoneMonitor.hwgrowlmonitor in Copy Plugins */ = {isa = PBXBuildFile; fileRef = BCE83C6515804D2C005570DD /* PhoneMonitor.hwgrowlmonitor */; };
 		BC006C3215AB004900643FA8 /* HWGPrefsBluetooth.tif in Resources */ = {isa = PBXBuildFile; fileRef = BC006C2515AB004900643FA8 /* HWGPrefsBluetooth.tif */; };
 		BC006C3315AB004900643FA8 /* HWGPrefsCapster.tif in Resources */ = {isa = PBXBuildFile; fileRef = BC006C2615AB004900643FA8 /* HWGPrefsCapster.tif */; };
 		BC006C3415AB004900643FA8 /* HWGPrefsDefault.tif in Resources */ = {isa = PBXBuildFile; fileRef = BC006C2715AB004900643FA8 /* HWGPrefsDefault.tif */; };
@@ -328,13 +327,6 @@
 			remoteGlobalIDString = BCF62368156878CC00AB4676;
 			remoteInfo = TimeMachineMonitor;
 		};
-		D0A0001118BCA00000000000 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BCB805DE155153330088C69A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = BCE83C6415804D2C005570DD;
-			remoteInfo = PhoneMonitor;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -374,7 +366,6 @@
 				932173D816390DB700D5790F /* KeyboardMonitor.hwgrowlmonitor in Copy Plugins */,
 				D0A0000A18BCA00000000000 /* ThunderboltMonitor.hwgrowlmonitor in Copy Plugins */,
 				D0A0000B18BCA00000000000 /* TimeMachineMonitor.hwgrowlmonitor in Copy Plugins */,
-				D0A0001018BCA00000000000 /* PhoneMonitor.hwgrowlmonitor in Copy Plugins */,
 			);
 			name = "Copy Plugins";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1412,7 +1403,6 @@
 				BCB807651551A6F10088C69A /* PBXTargetDependency */,
 				D0A0000E18BCA00000000000 /* PBXTargetDependency */,
 				D0A0000F18BCA00000000000 /* PBXTargetDependency */,
-				D0A0001218BCA00000000000 /* PBXTargetDependency */,
 			);
 			name = HardwareGrowler;
 			productName = HardwareGrowler;
@@ -2077,11 +2067,6 @@
 			isa = PBXTargetDependency;
 			target = BCF62368156878CC00AB4676 /* TimeMachineMonitor */;
 			targetProxy = D0A0000D18BCA00000000000 /* PBXContainerItemProxy */;
-		};
-		D0A0001218BCA00000000000 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = BCE83C6415804D2C005570DD /* PhoneMonitor */;
-			targetProxy = D0A0001118BCA00000000000 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

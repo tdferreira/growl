@@ -100,7 +100,9 @@ static inline NSData *HWGPNGDataForSystemSymbol(NSString *symbolName, NSString *
 @optional
 -(void)startObserving;
 -(void)stopObserving;
+-(void)postRegistrationInit;
 -(BOOL)enabledByDefault;
+-(BOOL)isAvailable;
 
 @end
 
@@ -112,7 +114,6 @@ static inline NSData *HWGPNGDataForSystemSymbol(NSString *symbolName, NSString *
 -(NSArray*)defaultNotifications;
 
 @optional
--(void)postRegistrationInit;
 -(void)fireOnLaunchNotes;
 -(void)noteClosed:(NSString*)contextString byClick:(BOOL)clicked;
 
