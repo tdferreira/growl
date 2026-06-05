@@ -536,7 +536,7 @@ typedef enum {
 	
 	NSString *description = [NSString stringWithFormat:NSLocalizedString(@"Joined network.\nSSID: %@\nBSSID: %@", @"AirPort connected notification body"),
 										 ssid,
-										 bssid ? bssid : NSLocalizedString(@"Unknown", @"Unknown network BSSID")];
+										 bssid ? bssid : NSLocalizedString(@"Unknown", @"Unknown value")];
 	NSString *title = [NSString stringWithFormat:NSLocalizedString(@"AirPort Connected: %@", @"AirPort connected notification title with SSID"), ssid];
 	NSString *identifier = [NSString stringWithFormat:@"HWGrowlAirPort-%@-%@", ssid, bssid ? bssid : @"UnknownBSSID"];
 	

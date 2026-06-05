@@ -28,6 +28,8 @@ static inline NSImage *HWGSystemSymbolImage(NSString *symbolName, NSString *fall
 	return image;
 }
 
+/* Render menu and notification symbols at a stable size so template images do
+   not become stretched or unreadable in dark/light notification appearances. */
 static inline NSData *HWGPNGDataForImage(NSImage *image, CGFloat size)
 {
 	if (!image)
@@ -101,11 +103,16 @@ static inline NSData *HWGPNGDataForSystemSymbol(NSString *symbolName, NSString *
 -(void)startObserving;
 -(void)stopObserving;
 -(void)postRegistrationInit;
+/* Monitors can opt out of being enabled on first launch while still remaining
+   visible in Preferences. */
 -(BOOL)enabledByDefault;
+/* Monitors can hide themselves when the current Mac lacks matching hardware. */
 -(BOOL)isAvailable;
 
 @end
 
+/* Shared plug-in loading predicates kept inline for unit-testable behavior
+   without changing the existing monitor bundle interface. */
 static inline BOOL HWGPluginIsAvailable(id plugin)
 {
 	return ![plugin respondsToSelector:@selector(isAvailable)] || [plugin isAvailable];

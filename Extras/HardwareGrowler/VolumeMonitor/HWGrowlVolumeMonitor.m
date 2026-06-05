@@ -111,7 +111,7 @@
 
 - (BOOL)shouldOpenMountedVolumeInFinder:(VolumeInfo *)volume;
 - (BOOL)boolResourceValueForURL:(NSURL *)url key:(NSURLResourceKey)key defaultValue:(BOOL)defaultValue;
-- (void)modernizePreferencePane;
+- (void)configurePreferencePane;
 
 @end
 
@@ -299,7 +299,7 @@
    }
 }
 
-- (void)modernizePreferencePane {
+- (void)configurePreferencePane {
 	NSScrollView *scrollView = [self.tableView enclosingScrollView];
 	NSClipView *clipView = [scrollView contentView];
 	
@@ -373,7 +373,7 @@
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
 		[[NSBundle bundleForClass:[self class]] loadNibNamed:@"VolumeMonitorPrefs" owner:self topLevelObjects:nil];
-		[self modernizePreferencePane];
+		[self configurePreferencePane];
 	});
 	return prefsView;
 }

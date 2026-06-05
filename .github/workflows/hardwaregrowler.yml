@@ -1,0 +1,33 @@
+name: HardwareGrowler
+
+on:
+  push:
+    paths:
+      - ".github/workflows/hardwaregrowler.yml"
+      - "Common/**"
+      - "Core/**"
+      - "Extras/HardwareGrowler/**"
+      - "external_dependencies/**"
+  pull_request:
+    paths:
+      - ".github/workflows/hardwaregrowler.yml"
+      - "Common/**"
+      - "Core/**"
+      - "Extras/HardwareGrowler/**"
+      - "external_dependencies/**"
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    name: Build and Test
+    runs-on: macos-15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Verify HardwareGrowler build
+        run: Extras/HardwareGrowler/Scripts/verify-build.sh

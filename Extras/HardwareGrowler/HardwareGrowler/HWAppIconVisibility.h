@@ -8,6 +8,8 @@ typedef enum : NSInteger {
 	kDontShowIcon = 3
 } HWGrowlIconState;
 
+/* Centralizes the Dock/menu-bar visibility rules so Preferences can apply the
+   choice immediately and tests can verify the hidden state without AppKit UI. */
 static inline BOOL HWGIconVisibilityShowsMenuBarIcon(HWGrowlIconState visibility)
 {
 	return (visibility == kShowIconInMenu || visibility == kShowIconInBoth);

@@ -22,6 +22,8 @@ NSString * const HWNotificationAdapterWillHandleNotificationResponseNotification
 		UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
 		center.delegate = self;
 		
+		/* Ask for dismiss callbacks so UserNotifications can approximate
+		   Growl's old noteClosed:byClick: behavior. */
 		UNNotificationCategory *category = [UNNotificationCategory categoryWithIdentifier:HWNotificationCategoryIdentifier
 																				  actions:[NSArray array]
 																		intentIdentifiers:[NSArray array]
@@ -85,7 +87,7 @@ NSString * const HWNotificationAdapterWillHandleNotificationResponseNotification
 	content.sound = [UNNotificationSound defaultSound];
 	content.categoryIdentifier = HWNotificationCategoryIdentifier;
 	
-		content.userInfo = HWNotificationUserInfo(name, plugin, context, identifier);
+	content.userInfo = HWNotificationUserInfo(name, plugin, context, identifier);
 	
 	NSString *requestIdentifier = identifier ? identifier : [[NSUUID UUID] UUIDString];
 	UNNotificationAttachment *attachment = [self notificationAttachmentForIconData:iconData
@@ -97,24 +99,27 @@ NSString * const HWNotificationAdapterWillHandleNotificationResponseNotification
 																		  content:content
 																		  trigger:nil];
 	
-		[[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest:request
-															   withCompletionHandler:^(NSError *error) {
-			if (error && [[content attachments] count]) {
-				UNMutableNotificationContent *fallbackContent = [content mutableCopy];
-				fallbackContent.attachments = [NSArray array];
-				UNNotificationRequest *fallbackRequest = [UNNotificationRequest requestWithIdentifier:requestIdentifier
-																							   content:fallbackContent
-																							   trigger:nil];
-				[[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest:fallbackRequest
-																	   withCompletionHandler:^(NSError *fallbackError) {
-					if (fallbackError)
-						NSLog(@"Notification post error: %@", fallbackError);
-				}];
-				[fallbackContent release];
-			} else if (error) {
-				NSLog(@"Notification post error: %@", error);
-			}
-		}];
+	[[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest:request
+														   withCompletionHandler:^(NSError *error) {
+		if (error && [[content attachments] count]) {
+			/* Some legacy monitor icons cannot be accepted as notification
+			   attachments. Keep the notification flowing by retrying without
+			   the custom icon instead of dropping the event. */
+			UNMutableNotificationContent *fallbackContent = [content mutableCopy];
+			fallbackContent.attachments = [NSArray array];
+			UNNotificationRequest *fallbackRequest = [UNNotificationRequest requestWithIdentifier:requestIdentifier
+																						   content:fallbackContent
+																						   trigger:nil];
+			[[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest:fallbackRequest
+																   withCompletionHandler:^(NSError *fallbackError) {
+				if (fallbackError)
+					NSLog(@"Notification post error: %@", fallbackError);
+			}];
+			[fallbackContent release];
+		} else if (error) {
+			NSLog(@"Notification post error: %@", error);
+		}
+	}];
 	
 	[content release];
 }
@@ -136,16 +141,16 @@ NSString * const HWNotificationAdapterWillHandleNotificationResponseNotification
 	NSString *fileName = [[self sanitizedAttachmentIdentifier:identifier] stringByAppendingPathExtension:extension];
 	NSString *filePath = [directoryPath stringByAppendingPathComponent:fileName];
 	NSError *writeError = nil;
-		if (![iconData writeToFile:filePath options:NSDataWritingAtomic error:&writeError]) {
-			NSLog(@"Notification icon write error: %@", writeError);
-			return nil;
-		}
-		[[NSFileManager defaultManager] setAttributes:[NSDictionary dictionaryWithObject:[NSNumber numberWithShort:0444]
-																				  forKey:NSFilePosixPermissions]
-										 ofItemAtPath:filePath
-												error:nil];
-		
-		NSError *attachmentError = nil;
+	if (![iconData writeToFile:filePath options:NSDataWritingAtomic error:&writeError]) {
+		NSLog(@"Notification icon write error: %@", writeError);
+		return nil;
+	}
+	[[NSFileManager defaultManager] setAttributes:[NSDictionary dictionaryWithObject:[NSNumber numberWithShort:0444]
+																			  forKey:NSFilePosixPermissions]
+									 ofItemAtPath:filePath
+											error:nil];
+	
+	NSError *attachmentError = nil;
 	UNNotificationAttachment *attachment = [UNNotificationAttachment attachmentWithIdentifier:fileName
 																						URL:[NSURL fileURLWithPath:filePath]
 																					options:nil

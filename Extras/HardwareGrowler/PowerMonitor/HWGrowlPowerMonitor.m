@@ -57,7 +57,7 @@
 		else
 		{
 			_powerType = HGUnknownPower;
-			self.typeString = NSLocalizedString(@"Unknown", @"Unknown power supply type");
+			self.typeString = NSLocalizedString(@"Unknown", @"Unknown value");
 		}
 		
 		if (CFDictionaryGetValue(description, CFSTR(kIOPSIsChargingKey)) == kCFBooleanTrue)
@@ -195,7 +195,7 @@
 		
 		self.refireBatteryStatusLabel = NSLocalizedString(@"Refire battery status", @"Label for checkbox that sets battery status to redisplay every so often");
 		self.refireEveryLabel = NSLocalizedString(@"Refire every:", @"Label for box for putting in the amount of time between refire");
-		self.minutesLabel = NSLocalizedString(@"minutes", @"Unit label for how often to refire the battery status");
+		self.minutesLabel = NSLocalizedString(@"minutes", @"Unit names");
 		self.refireOnlyOnBatteryLabel = NSLocalizedString(@"Refire only on battery", @"Label for checkbox that sets whether to only show battery status every x minutes when on battery pwoer");
 	}
 	return self;

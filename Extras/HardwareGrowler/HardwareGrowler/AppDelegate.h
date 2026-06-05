@@ -29,9 +29,9 @@
 	NSDate *suppressPreferencesUntil;
 	NSDate *automaticPreferencesOpenDate;
 	NSTimer *duplicateCleanupTimer;
-	NSView *modernGeneralView;
-	NSScrollView *modernModulesScrollView;
-	NSView *modernModulesContentView;
+	NSView *preferencesGeneralView;
+	NSScrollView *preferencesModulesScrollView;
+	NSView *preferencesModulesContentView;
 	NSSwitch *startAtLoginSwitch;
 	NSSwitch *showExistingSwitch;
 	NSSegmentedControl *visibilitySegmentedControl;

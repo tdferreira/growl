@@ -9,6 +9,8 @@
 
 typedef BOOL (*HWGFireWireServiceLookup)(const char *serviceClassName);
 
+/* FireWire is only useful on Macs or adapters that expose FireWire IORegistry
+   services. The lookup callback keeps the hardware check unit-testable. */
 static inline BOOL HWGFireWireHardwareAvailableWithServiceLookup(HWGFireWireServiceLookup serviceLookup)
 {
 	if (!serviceLookup)

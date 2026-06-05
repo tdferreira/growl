@@ -121,7 +121,7 @@ static NSString * const HWGBluetoothSymbolName = @"antenna.radiowaves.left.and.r
 }
 
 -(void)notifyBluetoothPoweredOn:(BOOL)poweredOn {
-	NSString *title = poweredOn ? NSLocalizedString(@"Bluetooth On", @"Bluetooth radio powered on notification title") : NSLocalizedString(@"Bluetooth Off", @"Bluetooth radio powered off notification title");
+	NSString *title = poweredOn ? NSLocalizedString(@"Bluetooth On", @"Bluetooth radio power state notification") : NSLocalizedString(@"Bluetooth Off", @"Bluetooth radio power state notification");
 	NSString *description = poweredOn ? NSLocalizedString(@"Bluetooth is available.", @"Bluetooth radio powered on notification body") : NSLocalizedString(@"Bluetooth is off.", @"Bluetooth radio powered off notification body");
 	
 	[delegate notifyWithName:poweredOn ? @"BluetoothPoweredOn" : @"BluetoothPoweredOff"
@@ -265,8 +265,8 @@ static NSString * const HWGBluetoothSymbolName = @"antenna.radiowaves.left.and.r
 -(NSDictionary*)localizedNames {
 	return [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Bluetooth Connected", @""), @"BluetoothConnected",
 			  NSLocalizedString(@"Bluetooth Disconnected", @""), @"BluetoothDisconnected",
-			  NSLocalizedString(@"Bluetooth On", @"Bluetooth radio powered on notification name"), @"BluetoothPoweredOn",
-			  NSLocalizedString(@"Bluetooth Off", @"Bluetooth radio powered off notification name"), @"BluetoothPoweredOff", nil];
+			  NSLocalizedString(@"Bluetooth On", @"Bluetooth radio power state notification"), @"BluetoothPoweredOn",
+			  NSLocalizedString(@"Bluetooth Off", @"Bluetooth radio power state notification"), @"BluetoothPoweredOff", nil];
 }
 -(NSDictionary*)noteDescriptions {
 	return [NSDictionary dictionaryWithObjectsAndKeys:NSLocalizedString(@"Sent when a Bluetooth Device is connected", @""), @"BluetoothConnected",

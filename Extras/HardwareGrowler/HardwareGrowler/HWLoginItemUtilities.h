@@ -9,6 +9,7 @@
 
 typedef BOOL (^HWLoginItemOperation)(NSError **error);
 
+/* Small test seam around SMAppService register/unregister operations. */
 static inline BOOL HWLoginItemSetEnabledWithOperations(BOOL enabled,
 													   HWLoginItemOperation registerOperation,
 													   HWLoginItemOperation unregisterOperation,

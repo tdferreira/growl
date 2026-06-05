@@ -9,6 +9,7 @@
 
 @interface HWLoginItemController : NSObject
 
+/* Enables or disables the bundled login helper through SMAppService. */
 + (BOOL)setStartAtLogin:(BOOL)enabled error:(NSError **)error;
 
 @end

@@ -158,6 +158,18 @@ Every line should include the same architecture family as the app. For Universal
 x86_64 arm64
 ```
 
+## Run Full Verification
+
+For the complete local build check, run:
+
+```sh
+Extras/HardwareGrowler/Scripts/verify-build.sh
+```
+
+This runs the test scheme, builds the Release Universal 2 app, scans for compiler/deprecation warnings, verifies app/helper/plug-in architectures, checks that Growl artifacts have not returned, and verifies the built app signature.
+
+The GitHub Actions workflow at `.github/workflows/hardwaregrowler.yml` runs the same verifier on macOS for pull requests and pushes that touch HardwareGrowler-related files.
+
 ## Signing Options
 
 ### Option 1: Sign to Run Locally
@@ -299,16 +311,18 @@ Notification authorization is managed in System Settings > Notifications. If a `
 
 ## Package
 
+Run the verifier first so the Release app exists and has already passed tests, architecture checks, warning checks, Growl artifact checks, and signature verification:
+
+```sh
+Extras/HardwareGrowler/Scripts/verify-build.sh
+```
+
 ### ZIP
 
 Create a ZIP suitable for local transfer:
 
 ```sh
-mkdir -p build/dist
-ditto \
-  -c -k --keepParent \
-  .xcode-derived-data-universal/Build/Products/Release/HardwareGrowler.app \
-  build/dist/HardwareGrowler-Universal2.zip
+Extras/HardwareGrowler/Scripts/package-local-release.sh zip
 ```
 
 ### DMG
@@ -316,16 +330,13 @@ ditto \
 Create a simple compressed DMG:
 
 ```sh
-mkdir -p build/dmg-root build/dist
-ditto \
-  .xcode-derived-data-universal/Build/Products/Release/HardwareGrowler.app \
-  build/dmg-root/HardwareGrowler.app
-hdiutil create \
-  -volname HardwareGrowler \
-  -srcfolder build/dmg-root \
-  -ov \
-  -format UDZO \
-  build/dist/HardwareGrowler-Universal2.dmg
+Extras/HardwareGrowler/Scripts/package-local-release.sh dmg
+```
+
+Create both local artifacts:
+
+```sh
+Extras/HardwareGrowler/Scripts/package-local-release.sh all
 ```
 
 For public distribution, notarize the ZIP, DMG, or PKG before sharing it.

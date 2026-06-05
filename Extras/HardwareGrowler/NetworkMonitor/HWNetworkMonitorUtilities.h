@@ -11,6 +11,8 @@
 #define HWGWiFiSettingsURLString @"x-apple.systempreferences:com.apple.wifi-settings-extension"
 #define HWGVPNSettingsURLString @"x-apple.systempreferences:com.apple.NetworkExtensionSettingsUI.NESettingsUIExtension"
 
+/* Best-effort VPN interface detection for notification click routing. macOS
+   does not expose every third-party VPN as a single public interface type. */
 static inline BOOL HWGNetworkInterfaceNameIsVPN(NSString *interfaceName)
 {
 	NSString *lowercaseInterface = [interfaceName lowercaseString];
@@ -41,6 +43,8 @@ static inline NSCharacterSet *HWGNetworkSSIDTrimCharacterSet(void)
 	return trimCharacters;
 }
 
+/* SSID values arrive from different APIs as either NSString or NSData. Decode
+   both forms and reject empty/control-only names before building notifications. */
 static inline NSString *HWGNetworkStringFromSSIDValue(id ssidValue)
 {
 	NSCharacterSet *trimCharacters = HWGNetworkSSIDTrimCharacterSet();
@@ -61,6 +65,7 @@ static inline NSString *HWGNetworkStringFromSSIDValue(id ssidValue)
 	return nil;
 }
 
+/* BSSID values can also arrive as NSData from dynamic-store payloads. */
 static inline NSString *HWGNetworkStringFromBSSIDValue(id bssidValue)
 {
 	if ([bssidValue isKindOfClass:[NSString class]])

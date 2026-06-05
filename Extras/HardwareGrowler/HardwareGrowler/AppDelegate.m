@@ -91,9 +91,9 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 	[automaticPreferencesOpenDate release];
 	[duplicateCleanupTimer invalidate];
 	[duplicateCleanupTimer release];
-	[modernGeneralView release];
-	[modernModulesScrollView release];
-	[modernModulesContentView release];
+	[preferencesGeneralView release];
+	[preferencesModulesScrollView release];
+	[preferencesModulesContentView release];
 	[startAtLoginSwitch release];
 	[showExistingSwitch release];
 	[visibilitySegmentedControl release];
@@ -136,7 +136,7 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 	[tableView reloadData];
 	}
 
-- (NSTextField *)modernLabelWithString:(NSString *)string
+- (NSTextField *)preferencesLabelWithString:(NSString *)string
                                   font:(NSFont *)font
                              textColor:(NSColor *)textColor
 {
@@ -162,82 +162,82 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 	[view setAutoresizingMask:NSViewMinYMargin | NSViewMinXMargin];
 }
 
-- (void)installModernGeneralPane
+- (void)installGeneralPreferencesPane
 {
 	NSView *generalPane = [[tabView tabViewItemAtIndex:0] view];
 	for (NSView *subview in [generalPane subviews])
 		[subview setHidden:YES];
 	
-	modernGeneralView = [[NSView alloc] initWithFrame:[generalPane bounds]];
-	[modernGeneralView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
-	[generalPane addSubview:modernGeneralView];
-	CGFloat topOffset = MAX(0.0, NSHeight([modernGeneralView bounds]) - 240.0);
-	CGFloat contentWidth = NSWidth([modernGeneralView bounds]);
+	preferencesGeneralView = [[NSView alloc] initWithFrame:[generalPane bounds]];
+	[preferencesGeneralView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+	[generalPane addSubview:preferencesGeneralView];
+	CGFloat topOffset = MAX(0.0, NSHeight([preferencesGeneralView bounds]) - 240.0);
+	CGFloat contentWidth = NSWidth([preferencesGeneralView bounds]);
 	CGFloat controlX = MAX(426.0, contentWidth - 74.0);
 	
-	NSTextField *title = [self modernLabelWithString:NSLocalizedString(@"General", @"")
+	NSTextField *title = [self preferencesLabelWithString:NSLocalizedString(@"General", @"")
 												font:[NSFont systemFontOfSize:20.0 weight:NSFontWeightSemibold]
 										   textColor:[NSColor labelColor]];
 	[title setFrame:NSMakeRect(24.0, topOffset + 190.0, MAX(120.0, contentWidth - 48.0), 26.0)];
 	[self setTopAnchoredAutoresizingMaskForView:title];
-	[modernGeneralView addSubview:title];
+	[preferencesGeneralView addSubview:title];
 	
-	NSTextField *subtitle = [self modernLabelWithString:NSLocalizedString(@"Choose how HardwareGrowler appears and starts.", @"General preferences subtitle")
+	NSTextField *subtitle = [self preferencesLabelWithString:NSLocalizedString(@"Choose how HardwareGrowler appears and starts.", @"General preferences subtitle")
 												   font:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]
 											  textColor:[NSColor secondaryLabelColor]];
 	[subtitle setFrame:NSMakeRect(24.0, topOffset + 169.0, MAX(120.0, contentWidth - 48.0), 18.0)];
 	[self setTopAnchoredAutoresizingMaskForView:subtitle];
-	[modernGeneralView addSubview:subtitle];
+	[preferencesGeneralView addSubview:subtitle];
 	
-	NSTextField *loginTitle = [self modernLabelWithString:NSLocalizedString(@"Start at login", @"General preference row title")
+	NSTextField *loginTitle = [self preferencesLabelWithString:NSLocalizedString(@"Start at login", @"General preference row title")
 													 font:[NSFont systemFontOfSize:13.0 weight:NSFontWeightMedium]
 												textColor:[NSColor labelColor]];
 	[loginTitle setFrame:NSMakeRect(24.0, topOffset + 128.0, MAX(120.0, contentWidth - 116.0), 18.0)];
 	[self setTopAnchoredAutoresizingMaskForView:loginTitle];
-	[modernGeneralView addSubview:loginTitle];
-	NSTextField *loginDetail = [self modernLabelWithString:NSLocalizedString(@"Launch HardwareGrowler automatically when you sign in.", @"General preference row detail")
+	[preferencesGeneralView addSubview:loginTitle];
+	NSTextField *loginDetail = [self preferencesLabelWithString:NSLocalizedString(@"Launch HardwareGrowler automatically when you sign in.", @"General preference row detail")
 													  font:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]
 												 textColor:[NSColor secondaryLabelColor]];
 	[loginDetail setFrame:NSMakeRect(24.0, topOffset + 108.0, MAX(120.0, contentWidth - 116.0), 18.0)];
 	[self setTopAnchoredAutoresizingMaskForView:loginDetail];
-	[modernGeneralView addSubview:loginDetail];
+	[preferencesGeneralView addSubview:loginDetail];
 	startAtLoginSwitch = [[NSSwitch alloc] initWithFrame:NSMakeRect(controlX, topOffset + 117.0, 42.0, 25.0)];
 	[startAtLoginSwitch sizeToFit];
 	[self setTopRightAnchoredAutoresizingMaskForView:startAtLoginSwitch];
 	[startAtLoginSwitch setTarget:self];
 	[startAtLoginSwitch setAction:@selector(startAtLoginSwitchChanged:)];
-	[modernGeneralView addSubview:startAtLoginSwitch];
+	[preferencesGeneralView addSubview:startAtLoginSwitch];
 	
 	NSBox *divider = [[[NSBox alloc] initWithFrame:NSMakeRect(24.0, topOffset + 92.0, MAX(120.0, contentWidth - 48.0), 1.0)] autorelease];
 	[divider setBoxType:NSBoxSeparator];
 	[self setTopAnchoredAutoresizingMaskForView:divider];
-	[modernGeneralView addSubview:divider];
+	[preferencesGeneralView addSubview:divider];
 	
-	NSTextField *showTitle = [self modernLabelWithString:NSLocalizedString(@"Show connected devices at launch", @"General preference row title")
+	NSTextField *showTitle = [self preferencesLabelWithString:NSLocalizedString(@"Show connected devices at launch", @"General preference row title")
 													font:[NSFont systemFontOfSize:13.0 weight:NSFontWeightMedium]
 											   textColor:[NSColor labelColor]];
 	[showTitle setFrame:NSMakeRect(24.0, topOffset + 61.0, MAX(120.0, contentWidth - 116.0), 18.0)];
 	[self setTopAnchoredAutoresizingMaskForView:showTitle];
-	[modernGeneralView addSubview:showTitle];
-	NSTextField *showDetail = [self modernLabelWithString:NSLocalizedString(@"Send a startup summary for devices that are already connected.", @"General preference row detail")
+	[preferencesGeneralView addSubview:showTitle];
+	NSTextField *showDetail = [self preferencesLabelWithString:NSLocalizedString(@"Send a startup summary for devices that are already connected.", @"General preference row detail")
 													 font:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]
 												textColor:[NSColor secondaryLabelColor]];
 	[showDetail setFrame:NSMakeRect(24.0, topOffset + 41.0, MAX(120.0, contentWidth - 116.0), 18.0)];
 	[self setTopAnchoredAutoresizingMaskForView:showDetail];
-	[modernGeneralView addSubview:showDetail];
+	[preferencesGeneralView addSubview:showDetail];
 	showExistingSwitch = [[NSSwitch alloc] initWithFrame:NSMakeRect(controlX, topOffset + 50.0, 42.0, 25.0)];
 	[showExistingSwitch sizeToFit];
 	[self setTopRightAnchoredAutoresizingMaskForView:showExistingSwitch];
 	[showExistingSwitch setTarget:self];
 	[showExistingSwitch setAction:@selector(showExistingSwitchChanged:)];
-	[modernGeneralView addSubview:showExistingSwitch];
+	[preferencesGeneralView addSubview:showExistingSwitch];
 	
-	NSTextField *visibilityTitle = [self modernLabelWithString:NSLocalizedString(@"App icon", @"General preference row title")
+	NSTextField *visibilityTitle = [self preferencesLabelWithString:NSLocalizedString(@"App icon", @"General preference row title")
 														  font:[NSFont systemFontOfSize:13.0 weight:NSFontWeightMedium]
 													 textColor:[NSColor labelColor]];
 	[visibilityTitle setFrame:NSMakeRect(24.0, topOffset + 13.0, 100.0, 18.0)];
 	[visibilityTitle setAutoresizingMask:NSViewMinYMargin];
-	[modernGeneralView addSubview:visibilityTitle];
+	[preferencesGeneralView addSubview:visibilityTitle];
 	visibilitySegmentedControl = [[NSSegmentedControl alloc] initWithFrame:NSMakeRect(124.0, topOffset + 8.0, MAX(160.0, contentWidth - 148.0), 28.0)];
 	[visibilitySegmentedControl setAutoresizingMask:NSViewMinYMargin | NSViewWidthSizable];
 	[visibilitySegmentedControl setSegmentCount:4];
@@ -248,9 +248,9 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 	[visibilitySegmentedControl setLabel:NSLocalizedString(@"Hidden", @"App icon visibility option") forSegment:3];
 	[visibilitySegmentedControl setTarget:self];
 	[visibilitySegmentedControl setAction:@selector(visibilitySegmentedControlChanged:)];
-	[modernGeneralView addSubview:visibilitySegmentedControl];
+	[preferencesGeneralView addSubview:visibilitySegmentedControl];
 	
-	[self syncModernPreferenceControls];
+	[self syncPreferenceControls];
 }
 
 - (void)setPreferenceView:(NSView *)view enabled:(BOOL)enabled
@@ -261,7 +261,7 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 		[self setPreferenceView:subview enabled:enabled];
 }
 
-- (CGFloat)modernPreferenceHeightForPlugin:(id<HWGrowlPluginProtocol>)plugin
+- (CGFloat)preferenceHeightForPlugin:(id<HWGrowlPluginProtocol>)plugin
 {
 	NSView *preferencePane = [plugin preferencePane];
 	if (!preferencePane)
@@ -298,14 +298,14 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 	return visibleRect;
 }
 
-	- (CGFloat)compactHeightForPreferencePane:(NSView *)preferencePane
-	{
-		NSRect visibleRect = [self visibleContentRectForPreferencePane:preferencePane];
-		return MIN(NSHeight([preferencePane bounds]), NSHeight(visibleRect));
-	}
+- (CGFloat)compactHeightForPreferencePane:(NSView *)preferencePane
+{
+	NSRect visibleRect = [self visibleContentRectForPreferencePane:preferencePane];
+	return MIN(NSHeight([preferencePane bounds]), NSHeight(visibleRect));
+}
 	
-	- (NSString *)moduleDescriptionForPlugin:(id<HWGrowlPluginProtocol>)plugin
-	{
+- (NSString *)moduleDescriptionForPlugin:(id<HWGrowlPluginProtocol>)plugin
+{
 	NSString *pluginClassName = NSStringFromClass([plugin class]);
 	NSDictionary *descriptions = [NSDictionary dictionaryWithObjectsAndKeys:
 								   NSLocalizedString(@"Watches Bluetooth power changes and device connections.", @"Bluetooth module description"), @"HWGrowlBluetoothMonitor",
@@ -313,197 +313,196 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 								   NSLocalizedString(@"Watches Caps Lock, Shift, and Fn key state changes.", @"Keyboard module description"), @"HWGrowlKeyboardMonitor",
 								   NSLocalizedString(@"Watches Wi-Fi, network interfaces, VPN, and IP address changes. Wi-Fi network names may require Location permission.", @"Network module description"), @"HWGrowlNetworkMonitor",
 								   NSLocalizedString(@"Watches battery level, charging, and power source changes.", @"Power module description"), @"HWGrowlPowerMonitor",
-									   NSLocalizedString(@"Watches Thunderbolt devices as they connect or disconnect.", @"Thunderbolt module description"), @"HWGrowlThunderboltMonitor",
-									   NSLocalizedString(@"Watches Time Machine backup start, finish, cancel, and failure events.", @"Time Machine module description"), @"HWGrowlTimeMachineMonitor",
-									   NSLocalizedString(@"Watches USB devices as they connect or disconnect.", @"USB module description"), @"HWGrowlUSBMonitor",
-									   NSLocalizedString(@"Watches user-mounted drives and removable volumes.", @"Volume module description"), @"HWGrowlVolumeMonitor",
-									   nil];
-		return [descriptions objectForKey:pluginClassName];
-	}
+								   NSLocalizedString(@"Watches Thunderbolt devices as they connect or disconnect.", @"Thunderbolt module description"), @"HWGrowlThunderboltMonitor",
+								   NSLocalizedString(@"Watches Time Machine backup start, finish, cancel, and failure events.", @"Time Machine module description"), @"HWGrowlTimeMachineMonitor",
+								   NSLocalizedString(@"Watches USB devices as they connect or disconnect.", @"USB module description"), @"HWGrowlUSBMonitor",
+								   NSLocalizedString(@"Watches user-mounted drives and removable volumes.", @"Volume module description"), @"HWGrowlVolumeMonitor",
+								   nil];
+	return [descriptions objectForKey:pluginClassName];
+}
 	
-	- (NSString *)configurationDescriptionForPlugin:(id<HWGrowlPluginProtocol>)plugin
-	{
-		NSString *pluginClassName = NSStringFromClass([plugin class]);
-		NSDictionary *descriptions = [NSDictionary dictionaryWithObjectsAndKeys:
-									   NSLocalizedString(@"Choose which keyboard state changes should send notifications.", @"Keyboard module configuration description"), @"HWGrowlKeyboardMonitor",
-									   NSLocalizedString(@"Choose whether battery status repeats and how often it repeats.", @"Power module configuration description"), @"HWGrowlPowerMonitor",
-									   NSLocalizedString(@"Choose which mounted volumes should be ignored.", @"Volume module configuration description"), @"HWGrowlVolumeMonitor",
-									   nil];
-		return [descriptions objectForKey:pluginClassName];
-	}
-
-- (void)reloadModernModulesPane
+- (NSString *)configurationDescriptionForPlugin:(id<HWGrowlPluginProtocol>)plugin
 {
-		if (!modernModulesContentView) {
-			return;
-		}
+	NSString *pluginClassName = NSStringFromClass([plugin class]);
+	NSDictionary *descriptions = [NSDictionary dictionaryWithObjectsAndKeys:
+								   NSLocalizedString(@"Choose which keyboard state changes should send notifications.", @"Keyboard module configuration description"), @"HWGrowlKeyboardMonitor",
+								   NSLocalizedString(@"Choose whether battery status repeats and how often it repeats.", @"Power module configuration description"), @"HWGrowlPowerMonitor",
+								   NSLocalizedString(@"Choose which mounted volumes should be ignored.", @"Volume module configuration description"), @"HWGrowlVolumeMonitor",
+								   nil];
+	return [descriptions objectForKey:pluginClassName];
+}
+
+- (void)reloadModulesPreferencesPane
+{
+	if (!preferencesModulesContentView)
+		return;
 	
-		NSArray *existingSubviews = [[[modernModulesContentView subviews] copy] autorelease];
-		for (NSView *subview in existingSubviews) {
-			[subview removeFromSuperview];
-		}
+	NSArray *existingSubviews = [[[preferencesModulesContentView subviews] copy] autorelease];
+	for (NSView *subview in existingSubviews) {
+		[subview removeFromSuperview];
+	}
 	
-		CGFloat viewportWidth = NSWidth([[modernModulesScrollView contentView] bounds]);
-		if (viewportWidth <= 0.0)
-			viewportWidth = NSWidth([modernModulesScrollView bounds]);
-		CGFloat contentWidth = MAX(500.0, viewportWidth);
-		CGFloat totalHeight = 74.0;
-		CGFloat baseRowHeight = 84.0;
-		CGFloat configurationDescriptionHeight = 34.0;
-		
-		for (NSDictionary *pluginDict in [pluginController plugins]) {
-			id<HWGrowlPluginProtocol> plugin = [pluginDict objectForKey:@"plugin"];
-			totalHeight += baseRowHeight;
-			CGFloat preferenceHeight = [self modernPreferenceHeightForPlugin:plugin];
-			if (preferenceHeight > 0.0) {
-				NSString *configurationDescription = [self configurationDescriptionForPlugin:plugin];
-				if ([configurationDescription length])
-					totalHeight += configurationDescriptionHeight;
-				totalHeight += preferenceHeight + 16.0;
-			}
-			totalHeight += 1.0;
+	CGFloat viewportWidth = NSWidth([[preferencesModulesScrollView contentView] bounds]);
+	if (viewportWidth <= 0.0)
+		viewportWidth = NSWidth([preferencesModulesScrollView bounds]);
+	CGFloat contentWidth = MAX(500.0, viewportWidth);
+	CGFloat totalHeight = 74.0;
+	CGFloat baseRowHeight = 84.0;
+	CGFloat configurationDescriptionHeight = 34.0;
+	
+	for (NSDictionary *pluginDict in [pluginController plugins]) {
+		id<HWGrowlPluginProtocol> plugin = [pluginDict objectForKey:@"plugin"];
+		totalHeight += baseRowHeight;
+		CGFloat preferenceHeight = [self preferenceHeightForPlugin:plugin];
+		if (preferenceHeight > 0.0) {
+			NSString *configurationDescription = [self configurationDescriptionForPlugin:plugin];
+			if ([configurationDescription length])
+				totalHeight += configurationDescriptionHeight;
+			totalHeight += preferenceHeight + 16.0;
 		}
+		totalHeight += 1.0;
+	}
 	totalHeight += 22.0;
 	
-	[modernModulesContentView setFrame:NSMakeRect(0.0, 0.0, contentWidth, totalHeight)];
-	[modernModulesContentView setAutoresizingMask:NSViewWidthSizable];
+	[preferencesModulesContentView setFrame:NSMakeRect(0.0, 0.0, contentWidth, totalHeight)];
+	[preferencesModulesContentView setAutoresizingMask:NSViewWidthSizable];
 	
 	CGFloat y = totalHeight - 34.0;
-	NSTextField *title = [self modernLabelWithString:NSLocalizedString(@"Modules", @"")
+	NSTextField *title = [self preferencesLabelWithString:NSLocalizedString(@"Modules", @"")
 												font:[NSFont systemFontOfSize:20.0 weight:NSFontWeightSemibold]
 										   textColor:[NSColor labelColor]];
 	[title setFrame:NSMakeRect(24.0, y, contentWidth - 48.0, 26.0)];
 	[title setAutoresizingMask:NSViewWidthSizable | NSViewMinYMargin];
-	[modernModulesContentView addSubview:title];
+	[preferencesModulesContentView addSubview:title];
 	y -= 36.0;
 	
 	NSInteger rowIndex = 0;
 	for (NSDictionary *pluginDict in [pluginController plugins]) {
 		id<HWGrowlPluginProtocol> plugin = [pluginDict objectForKey:@"plugin"];
 		BOOL enabled = ![[pluginDict objectForKey:@"disabled"] boolValue];
-			NSView *preferencePane = [plugin preferencePane];
-			NSRect preferenceVisibleRect = preferencePane ? [self visibleContentRectForPreferencePane:preferencePane] : NSZeroRect;
-			CGFloat preferenceHeight = preferencePane ? MAX(44.0, NSHeight(preferenceVisibleRect)) : 0.0;
-			NSString *configurationDescription = preferencePane ? [self configurationDescriptionForPlugin:plugin] : nil;
-			CGFloat activeConfigurationDescriptionHeight = ([configurationDescription length] && preferencePane) ? configurationDescriptionHeight : 0.0;
-			CGFloat rowTop = y;
-			CGFloat rowHeight = baseRowHeight + (preferencePane ? activeConfigurationDescriptionHeight + preferenceHeight + 16.0 : 0.0);
-			
-			NSImageView *imageView = [[[NSImageView alloc] initWithFrame:NSMakeRect(24.0, rowTop - 48.0, 28.0, 28.0)] autorelease];
-			[imageView setImage:[self preferenceIconForPlugin:plugin]];
-			[imageView setImageScaling:NSImageScaleProportionallyDown];
-			[imageView setAutoresizingMask:NSViewMinYMargin];
-		[modernModulesContentView addSubview:imageView];
+		NSView *preferencePane = [plugin preferencePane];
+		NSRect preferenceVisibleRect = preferencePane ? [self visibleContentRectForPreferencePane:preferencePane] : NSZeroRect;
+		CGFloat preferenceHeight = preferencePane ? MAX(44.0, NSHeight(preferenceVisibleRect)) : 0.0;
+		NSString *configurationDescription = preferencePane ? [self configurationDescriptionForPlugin:plugin] : nil;
+		CGFloat activeConfigurationDescriptionHeight = ([configurationDescription length] && preferencePane) ? configurationDescriptionHeight : 0.0;
+		CGFloat rowTop = y;
+		CGFloat rowHeight = baseRowHeight + (preferencePane ? activeConfigurationDescriptionHeight + preferenceHeight + 16.0 : 0.0);
 		
-			NSTextField *nameLabel = [self modernLabelWithString:[plugin pluginDisplayName]
-															font:[NSFont systemFontOfSize:13.0 weight:NSFontWeightMedium]
-													   textColor:[NSColor labelColor]];
-			[nameLabel setFrame:NSMakeRect(64.0, rowTop - 34.0, MAX(80.0, contentWidth - 142.0), 18.0)];
-			[nameLabel setLineBreakMode:NSLineBreakByTruncatingTail];
-			[nameLabel setAutoresizingMask:NSViewWidthSizable | NSViewMinYMargin];
-			[modernModulesContentView addSubview:nameLabel];
-			
-			NSTextField *descriptionLabel = [self modernLabelWithString:[self moduleDescriptionForPlugin:plugin]
+		NSImageView *imageView = [[[NSImageView alloc] initWithFrame:NSMakeRect(24.0, rowTop - 48.0, 28.0, 28.0)] autorelease];
+		[imageView setImage:[self preferenceIconForPlugin:plugin]];
+		[imageView setImageScaling:NSImageScaleProportionallyDown];
+		[imageView setAutoresizingMask:NSViewMinYMargin];
+		[preferencesModulesContentView addSubview:imageView];
+		
+		NSTextField *nameLabel = [self preferencesLabelWithString:[plugin pluginDisplayName]
+															 font:[NSFont systemFontOfSize:13.0 weight:NSFontWeightMedium]
+														textColor:[NSColor labelColor]];
+		[nameLabel setFrame:NSMakeRect(64.0, rowTop - 34.0, MAX(80.0, contentWidth - 142.0), 18.0)];
+		[nameLabel setLineBreakMode:NSLineBreakByTruncatingTail];
+		[nameLabel setAutoresizingMask:NSViewWidthSizable | NSViewMinYMargin];
+		[preferencesModulesContentView addSubview:nameLabel];
+		
+		NSTextField *descriptionLabel = [self preferencesLabelWithString:[self moduleDescriptionForPlugin:plugin]
 																	font:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]
 															   textColor:[NSColor secondaryLabelColor]];
-			[descriptionLabel setFrame:NSMakeRect(64.0, rowTop - 66.0, MAX(80.0, contentWidth - 142.0), 34.0)];
-			[descriptionLabel setLineBreakMode:NSLineBreakByWordWrapping];
-			[descriptionLabel setUsesSingleLineMode:NO];
-			[descriptionLabel setAutoresizingMask:NSViewWidthSizable | NSViewMinYMargin];
-			[modernModulesContentView addSubview:descriptionLabel];
-			
-			NSSwitch *moduleSwitch = [[[NSSwitch alloc] initWithFrame:NSMakeRect(0.0, 0.0, 42.0, 25.0)] autorelease];
-			[moduleSwitch sizeToFit];
-			NSSize switchSize = [moduleSwitch frame].size;
-			[moduleSwitch setFrame:NSMakeRect(contentWidth - switchSize.width - 24.0,
-											  rowTop - 44.0,
-											  switchSize.width,
-											  switchSize.height)];
+		[descriptionLabel setFrame:NSMakeRect(64.0, rowTop - 66.0, MAX(80.0, contentWidth - 142.0), 34.0)];
+		[descriptionLabel setLineBreakMode:NSLineBreakByWordWrapping];
+		[descriptionLabel setUsesSingleLineMode:NO];
+		[descriptionLabel setAutoresizingMask:NSViewWidthSizable | NSViewMinYMargin];
+		[preferencesModulesContentView addSubview:descriptionLabel];
+		
+		NSSwitch *moduleSwitch = [[[NSSwitch alloc] initWithFrame:NSMakeRect(0.0, 0.0, 42.0, 25.0)] autorelease];
+		[moduleSwitch sizeToFit];
+		NSSize switchSize = [moduleSwitch frame].size;
+		[moduleSwitch setFrame:NSMakeRect(contentWidth - switchSize.width - 24.0,
+										  rowTop - 44.0,
+										  switchSize.width,
+										  switchSize.height)];
 		[moduleSwitch setState:enabled ? NSControlStateValueOn : NSControlStateValueOff];
 		[moduleSwitch setTag:rowIndex];
 		[moduleSwitch setTarget:self];
 		[moduleSwitch setAction:@selector(moduleSwitchChanged:)];
 		[moduleSwitch setAutoresizingMask:NSViewMinXMargin | NSViewMinYMargin];
-			[modernModulesContentView addSubview:moduleSwitch];
-			
-			if (activeConfigurationDescriptionHeight > 0.0) {
-				NSTextField *configurationLabel = [self modernLabelWithString:configurationDescription
+		[preferencesModulesContentView addSubview:moduleSwitch];
+		
+		if (activeConfigurationDescriptionHeight > 0.0) {
+			NSTextField *configurationLabel = [self preferencesLabelWithString:configurationDescription
 																		 font:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]
 																	textColor:enabled ? [NSColor secondaryLabelColor] : [NSColor tertiaryLabelColor]];
-				[configurationLabel setFrame:NSMakeRect(64.0,
-														rowTop - baseRowHeight - activeConfigurationDescriptionHeight,
-														MAX(100.0, contentWidth - 88.0),
-														activeConfigurationDescriptionHeight)];
-				[configurationLabel setLineBreakMode:NSLineBreakByWordWrapping];
-				[configurationLabel setUsesSingleLineMode:NO];
-				[configurationLabel setAutoresizingMask:NSViewWidthSizable | NSViewMinYMargin];
-				[modernModulesContentView addSubview:configurationLabel];
-			}
-			
-			if (preferencePane) {
-				if ([preferencePane superview])
-					[preferencePane removeFromSuperview];
-				[preferencePane setBoundsOrigin:NSMakePoint(0.0, NSMinY(preferenceVisibleRect))];
-				[preferencePane setFrame:NSMakeRect(64.0,
-													rowTop - baseRowHeight - activeConfigurationDescriptionHeight - preferenceHeight - 8.0,
+			[configurationLabel setFrame:NSMakeRect(64.0,
+													rowTop - baseRowHeight - activeConfigurationDescriptionHeight,
 													MAX(100.0, contentWidth - 88.0),
-													preferenceHeight)];
+													activeConfigurationDescriptionHeight)];
+			[configurationLabel setLineBreakMode:NSLineBreakByWordWrapping];
+			[configurationLabel setUsesSingleLineMode:NO];
+			[configurationLabel setAutoresizingMask:NSViewWidthSizable | NSViewMinYMargin];
+			[preferencesModulesContentView addSubview:configurationLabel];
+		}
+		
+		if (preferencePane) {
+			if ([preferencePane superview])
+				[preferencePane removeFromSuperview];
+			[preferencePane setBoundsOrigin:NSMakePoint(0.0, NSMinY(preferenceVisibleRect))];
+			[preferencePane setFrame:NSMakeRect(64.0,
+												rowTop - baseRowHeight - activeConfigurationDescriptionHeight - preferenceHeight - 8.0,
+												MAX(100.0, contentWidth - 88.0),
+												preferenceHeight)];
 			[preferencePane setAutoresizingMask:NSViewWidthSizable | NSViewMinYMargin];
 			[preferencePane setAlphaValue:enabled ? 1.0 : 0.45];
 			[self setPreferenceView:preferencePane enabled:enabled];
-			[modernModulesContentView addSubview:preferencePane];
+			[preferencesModulesContentView addSubview:preferencePane];
 		}
 		
 		NSBox *divider = [[[NSBox alloc] initWithFrame:NSMakeRect(24.0, rowTop - rowHeight, contentWidth - 48.0, 1.0)] autorelease];
 		[divider setBoxType:NSBoxSeparator];
 		[divider setAutoresizingMask:NSViewWidthSizable | NSViewMinYMargin];
-		[modernModulesContentView addSubview:divider];
+		[preferencesModulesContentView addSubview:divider];
 		
 		y -= rowHeight + 1.0;
 		rowIndex++;
 	}
 	
-	CGFloat visibleHeight = NSHeight([[modernModulesScrollView contentView] bounds]);
+	CGFloat visibleHeight = NSHeight([[preferencesModulesScrollView contentView] bounds]);
 	if (totalHeight > visibleHeight)
-		[modernModulesContentView scrollPoint:NSMakePoint(0.0, totalHeight - visibleHeight)];
+		[preferencesModulesContentView scrollPoint:NSMakePoint(0.0, totalHeight - visibleHeight)];
 	else
-		[modernModulesContentView scrollPoint:NSZeroPoint];
+		[preferencesModulesContentView scrollPoint:NSZeroPoint];
 }
 
-- (void)modernizeModulesPane
+- (void)configureModulesPane
 {
 	NSView *modulesPane = [[tabView tabViewItemAtIndex:1] view];
 	for (NSView *subview in [modulesPane subviews])
 		[subview setHidden:YES];
 	
-	modernModulesScrollView = [[NSScrollView alloc] initWithFrame:[modulesPane bounds]];
-	[modernModulesScrollView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
-	[modernModulesScrollView setBorderType:NSNoBorder];
-	[modernModulesScrollView setHasVerticalScroller:YES];
-	[modernModulesScrollView setDrawsBackground:NO];
+	preferencesModulesScrollView = [[NSScrollView alloc] initWithFrame:[modulesPane bounds]];
+	[preferencesModulesScrollView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+	[preferencesModulesScrollView setBorderType:NSNoBorder];
+	[preferencesModulesScrollView setHasVerticalScroller:YES];
+	[preferencesModulesScrollView setDrawsBackground:NO];
 	
-	modernModulesContentView = [[NSView alloc] initWithFrame:NSMakeRect(0.0, 0.0, NSWidth([modulesPane bounds]), NSHeight([modulesPane bounds]))];
-	[modernModulesScrollView setDocumentView:modernModulesContentView];
-	[modulesPane addSubview:modernModulesScrollView];
+	preferencesModulesContentView = [[NSView alloc] initWithFrame:NSMakeRect(0.0, 0.0, NSWidth([modulesPane bounds]), NSHeight([modulesPane bounds]))];
+	[preferencesModulesScrollView setDocumentView:preferencesModulesContentView];
+	[modulesPane addSubview:preferencesModulesScrollView];
 	
-	[self reloadModernModulesPane];
+	[self reloadModulesPreferencesPane];
 }
 
-- (void)modernizePreferencesWindow
+- (void)configurePreferencesWindow
 {
 	[self.window setTitle:NSLocalizedString(@"HardwareGrowler Settings", @"Preferences window title")];
 	[self.window setContentMinSize:NSMakeSize(500.0, 260.0)];
 	[self.window setDelegate:self];
-	[self installModernGeneralPane];
-	[self modernizeModulesPane];
+	[self installGeneralPreferencesPane];
+	[self configureModulesPane];
 }
 
 - (void)windowDidResize:(NSNotification *)notification
 {
-	[self reloadModernModulesPane];
+	[self reloadModulesPreferencesPane];
 }
 
-- (void)syncModernPreferenceControls
+- (void)syncPreferenceControls
 {
 	NSUserDefaults *defaults = [[NSUserDefaultsController sharedUserDefaultsController] defaults];
 	[startAtLoginSwitch setState:[defaults boolForKey:@"OnLogin"] ? NSControlStateValueOn : NSControlStateValueOff];
@@ -561,7 +560,7 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 	[imageTextCell setTextColor:[NSColor labelColor]];
    [moduleColumn setDataCell:imageTextCell];
 	[self configurePreferencesAppearance];
-	[self modernizePreferencesWindow];
+	[self configurePreferencesWindow];
 }
 
 	- (IBAction)showPreferences:(id)sender
@@ -858,7 +857,7 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 						[[defaultController values] setValue:[NSNumber numberWithInteger:oldIconValue] forKey:@"Visibility"];
 						[defaultController save:nil];
 						[iconPopUp selectItemAtIndex:oldIconValue];
-						[self syncModernPreferenceControls];
+						[self syncPreferenceControls];
 						return;
 					}
 				}
@@ -875,7 +874,7 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 		}
 		[self applyIconVisibility:index];
 		oldIconValue = index;
-		[self syncModernPreferenceControls];
+		[self syncPreferenceControls];
 	}
 	else if ([keyPath isEqualToString:@"values.OnLogin"])
 	{
@@ -914,7 +913,7 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 			[self setStartAtLogin:NO];
 		}
 		oldOnLoginValue = state;
-		[self syncModernPreferenceControls];
+		[self syncPreferenceControls];
 	}
 	else if(object == onLoginSwitch && [keyPath isEqualToString:@"state"])
 	{
@@ -1007,7 +1006,7 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 	[defaults setObject:disabledDict forKey:@"DisabledPlugins"];
 	[defaults synchronize];
 	[tableView reloadData];
-	[self reloadModernModulesPane];
+	[self reloadModulesPreferencesPane];
 }
 
 - (IBAction)moduleSwitchChanged:(id)sender
@@ -1042,7 +1041,7 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 		[defaults setObject:disabledDict forKey:@"DisabledPlugins"];
 		[defaults synchronize];
 		[tableView reloadData];
-		[self reloadModernModulesPane];
+		[self reloadModulesPreferencesPane];
 	}
 }
 
@@ -1063,7 +1062,7 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 		[imageView setImageScaling:NSImageScaleProportionallyDown];
 		[cellView addSubview:imageView];
 		
-		NSTextField *nameLabel = [self modernLabelWithString:[plugin pluginDisplayName]
+		NSTextField *nameLabel = [self preferencesLabelWithString:[plugin pluginDisplayName]
 														font:[NSFont systemFontOfSize:13.0 weight:NSFontWeightMedium]
 												   textColor:[NSColor labelColor]];
 		[nameLabel setFrame:NSMakeRect(48.0, 14.0, MAX(20.0, [aTableColumn width] - 52.0), 18.0)];
