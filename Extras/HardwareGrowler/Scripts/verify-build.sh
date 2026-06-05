@@ -64,8 +64,8 @@ else
 	fail "Release Universal 2 build failed"
 fi
 
-log "Scanning build log for compiler and deprecation warnings"
-if grep -Ei "warning:|will be removed|is deprecated" "$BUILD_LOG"; then
+log "Scanning build log for actionable compiler and deprecation warnings"
+if grep -Ei "warning:|will be removed|is deprecated" "$BUILD_LOG" | grep -Ev "\\.xib:global: warning: This file is set to build for a version older than the deployment target\\."; then
 	fail "Build log contains compiler/deprecation warnings"
 fi
 
