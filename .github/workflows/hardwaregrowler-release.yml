@@ -23,6 +23,7 @@ jobs:
   release:
     name: Build and Publish
     runs-on: macos-15
+    timeout-minutes: 20
     permissions:
       contents: write
 
@@ -55,9 +56,11 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode.app
 
       - name: Verify HardwareGrowler build
+        timeout-minutes: 10
         run: Extras/HardwareGrowler/Scripts/verify-build.sh
 
       - name: Package release artifacts
+        timeout-minutes: 5
         run: Extras/HardwareGrowler/Scripts/package-local-release.sh all
 
       - name: Generate release notes
@@ -96,6 +99,7 @@ jobs:
           cat "${notes_file}"
 
       - name: Publish GitHub release
+        timeout-minutes: 5
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
