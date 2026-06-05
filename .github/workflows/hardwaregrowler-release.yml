@@ -81,6 +81,7 @@ jobs:
           fi
 
           version="${TAG_NAME#hardwaregrowler-v}"
+          commit_limit=75
 
           {
             printf '# HardwareGrowler %s\n\n' "${version}"
@@ -91,7 +92,22 @@ jobs:
             printf 'These artifacts are ad-hoc signed by CI and are not Apple-notarized. For normal use on your own Mac, see the HardwareGrowler README for local self-signing and Gatekeeper notes:\n\n'
             printf 'https://github.com/%s/blob/%s/Extras/HardwareGrowler/README.md#using-downloaded-release-artifacts\n\n' "${GITHUB_REPOSITORY}" "${TAG_NAME}"
             printf '## Changes\n\n'
-            git log --pretty=format:'- %s ([%h](https://github.com/'"${GITHUB_REPOSITORY}"'/commit/%H))' "${commit_range}"
+            if [[ -n "${previous_tag}" ]]; then
+              commit_count="$(git rev-list --count "${commit_range}")"
+              if (( commit_count > commit_limit )); then
+                printf '_Showing the latest %s of %s commits. See the full commit list below._\n\n' "${commit_limit}" "${commit_count}"
+              fi
+
+              git log --max-count="${commit_limit}" --pretty=format:'- %s ([%h](https://github.com/'"${GITHUB_REPOSITORY}"'/commit/%H))' "${commit_range}"
+            else
+              commit_count="$(git rev-list --count "${commit_range}" -- Extras/HardwareGrowler .github/workflows/hardwaregrowler.yml .github/workflows/hardwaregrowler-release.yml)"
+              printf '_Initial automated HardwareGrowler release. Showing recent HardwareGrowler-related commits._\n\n'
+              if (( commit_count > commit_limit )); then
+                printf '_Showing the latest %s of %s matching commits. See the full commit list below._\n\n' "${commit_limit}" "${commit_count}"
+              fi
+
+              git log --max-count="${commit_limit}" --pretty=format:'- %s ([%h](https://github.com/'"${GITHUB_REPOSITORY}"'/commit/%H))' "${commit_range}" -- Extras/HardwareGrowler .github/workflows/hardwaregrowler.yml .github/workflows/hardwaregrowler-release.yml
+            fi
             printf '\n\n## Full Commit List\n\n'
             printf '%s\n' "${compare_url}"
           } > "${notes_file}"
