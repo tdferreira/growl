@@ -23,6 +23,8 @@ jobs:
   release:
     name: Build and Publish
     runs-on: macos-15
+    permissions:
+      contents: write
 
     steps:
       - name: Resolve release tag
@@ -96,6 +98,7 @@ jobs:
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           TAG_NAME: ${{ steps.release-tag.outputs.tag_name }}
           PRERELEASE: ${{ inputs.prerelease }}
         run: |
@@ -107,6 +110,8 @@ jobs:
             gh release create "${TAG_NAME}" \
               build/dist/HardwareGrowler-Universal2.zip \
               build/dist/HardwareGrowler-Universal2.dmg \
+              --repo "${GH_REPO}" \
+              --target "${GITHUB_SHA}" \
               --title "HardwareGrowler ${version}" \
               --notes-file build/dist/release-notes.md \
               --prerelease
@@ -114,6 +119,8 @@ jobs:
             gh release create "${TAG_NAME}" \
               build/dist/HardwareGrowler-Universal2.zip \
               build/dist/HardwareGrowler-Universal2.dmg \
+              --repo "${GH_REPO}" \
+              --target "${GITHUB_SHA}" \
               --title "HardwareGrowler ${version}" \
               --notes-file build/dist/release-notes.md
           fi
