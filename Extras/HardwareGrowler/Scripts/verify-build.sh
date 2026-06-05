@@ -43,17 +43,25 @@ xcodebuild \
 	test
 
 log "Building Release Universal 2 app"
-xcodebuild \
-	-project "$PROJECT" \
-	-scheme HardwareGrowler \
-	-configuration Release \
-	-destination generic/platform=macOS \
-	-derivedDataPath "$DERIVED_UNIVERSAL" \
-	ARCHS="arm64 x86_64" \
-	ONLY_ACTIVE_ARCH=NO \
-	CODE_SIGN_IDENTITY=- \
-	CODE_SIGNING_ALLOWED=YES \
-	build 2>&1 | tee "$BUILD_LOG"
+# Capture the Release build log without a pipe. Some GitHub macOS runners have
+# reported a non-zero pipeline status after xcodebuild printed BUILD SUCCEEDED;
+# keeping xcodebuild as the direct command makes the failure signal unambiguous.
+if xcodebuild \
+		-project "$PROJECT" \
+		-scheme HardwareGrowler \
+		-configuration Release \
+		-destination generic/platform=macOS \
+		-derivedDataPath "$DERIVED_UNIVERSAL" \
+		ARCHS="arm64 x86_64" \
+		ONLY_ACTIVE_ARCH=NO \
+		CODE_SIGN_IDENTITY=- \
+		CODE_SIGNING_ALLOWED=YES \
+		build > "$BUILD_LOG" 2>&1; then
+	cat "$BUILD_LOG"
+else
+	cat "$BUILD_LOG"
+	fail "Release Universal 2 build failed"
+fi
 
 log "Scanning build log for compiler and deprecation warnings"
 if grep -Ei "warning:|will be removed|is deprecated" "$BUILD_LOG"; then
