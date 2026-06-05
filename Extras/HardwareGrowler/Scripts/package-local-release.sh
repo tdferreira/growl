@@ -1,8 +1,8 @@
 #!/bin/zsh
 set -euo pipefail
 
-# Creates unsigned/ad-hoc local artifacts from the verified Release build. This
-# is for local testing; public releases still need Developer ID notarization.
+# Creates unsigned/ad-hoc artifacts from the verified Release build. These can
+# be shared, but Gatekeeper-friendly public releases need Developer ID notarization.
 ROOT_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 PRODUCTS_DIR="$ROOT_DIR/.xcode-derived-data-universal/Build/Products/Release"
 APP="$PRODUCTS_DIR/HardwareGrowler.app"

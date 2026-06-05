@@ -1,0 +1,115 @@
+name: HardwareGrowler Release
+
+on:
+  push:
+    tags:
+      - "hardwaregrowler-v*"
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Existing tag to publish, for example hardwaregrowler-v1.0.0"
+        required: true
+        type: string
+      prerelease:
+        description: "Mark the GitHub release as a prerelease"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and Publish
+    runs-on: macos-15
+
+    steps:
+      - name: Resolve release tag
+        id: release-tag
+        env:
+          DISPATCH_TAG: ${{ inputs.tag_name }}
+        run: |
+          if [[ -n "${DISPATCH_TAG}" ]]; then
+            tag_name="${DISPATCH_TAG}"
+          else
+            tag_name="${GITHUB_REF_NAME}"
+          fi
+
+          if [[ ! "${tag_name}" == hardwaregrowler-v* ]]; then
+            echo "Release tags must start with hardwaregrowler-v" >&2
+            exit 1
+          fi
+
+          echo "tag_name=${tag_name}" >> "${GITHUB_OUTPUT}"
+
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.release-tag.outputs.tag_name }}
+          fetch-depth: 0
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Verify HardwareGrowler build
+        run: Extras/HardwareGrowler/Scripts/verify-build.sh
+
+      - name: Package release artifacts
+        run: Extras/HardwareGrowler/Scripts/package-local-release.sh all
+
+      - name: Generate release notes
+        env:
+          TAG_NAME: ${{ steps.release-tag.outputs.tag_name }}
+        run: |
+          set -euo pipefail
+
+          notes_file="build/dist/release-notes.md"
+          previous_tag="$(git tag --merged "${TAG_NAME}" --list "hardwaregrowler-v*" --sort=-creatordate | grep -v "^${TAG_NAME}$" | head -n 1 || true)"
+
+          if [[ -n "${previous_tag}" ]]; then
+            commit_range="${previous_tag}..${TAG_NAME}"
+            compare_url="https://github.com/${GITHUB_REPOSITORY}/compare/${previous_tag}...${TAG_NAME}"
+          else
+            commit_range="${TAG_NAME}"
+            compare_url="https://github.com/${GITHUB_REPOSITORY}/commits/${TAG_NAME}"
+          fi
+
+          version="${TAG_NAME#hardwaregrowler-v}"
+
+          {
+            printf '# HardwareGrowler %s\n\n' "${version}"
+            printf 'This release contains a Universal 2 HardwareGrowler build for macOS.\n\n'
+            printf '## Artifacts\n\n'
+            printf -- '- `HardwareGrowler-Universal2.zip`: ZIP archive containing `HardwareGrowler.app`. This is usually the easiest artifact to download and unpack.\n'
+            printf -- '- `HardwareGrowler-Universal2.dmg`: compressed disk image containing `HardwareGrowler.app`. Use this if you prefer a mountable macOS disk image.\n\n'
+            printf 'These artifacts are ad-hoc signed by CI and are not Apple-notarized. For normal use on your own Mac, see the HardwareGrowler README for local self-signing and Gatekeeper notes:\n\n'
+            printf 'https://github.com/%s/blob/%s/Extras/HardwareGrowler/README.md#using-downloaded-release-artifacts\n\n' "${GITHUB_REPOSITORY}" "${TAG_NAME}"
+            printf '## Changes\n\n'
+            git log --pretty=format:'- %s ([%h](https://github.com/'"${GITHUB_REPOSITORY}"'/commit/%H))' "${commit_range}"
+            printf '\n\n## Full Commit List\n\n'
+            printf '%s\n' "${compare_url}"
+          } > "${notes_file}"
+
+          cat "${notes_file}"
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ steps.release-tag.outputs.tag_name }}
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          set -euo pipefail
+
+          version="${TAG_NAME#hardwaregrowler-v}"
+          prerelease_args=()
+          if [[ "${PRERELEASE}" == "true" ]]; then
+            prerelease_args+=(--prerelease)
+          fi
+
+          gh release create "${TAG_NAME}" \
+            build/dist/HardwareGrowler-Universal2.zip \
+            build/dist/HardwareGrowler-Universal2.dmg \
+            --title "HardwareGrowler ${version}" \
+            --notes-file build/dist/release-notes.md \
+            "${prerelease_args[@]}"

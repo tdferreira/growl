@@ -339,7 +339,77 @@ Create both local artifacts:
 Extras/HardwareGrowler/Scripts/package-local-release.sh all
 ```
 
-For public distribution, notarize the ZIP, DMG, or PKG before sharing it.
+### Release Artifacts
+
+GitHub releases publish both package formats:
+
+- `HardwareGrowler-Universal2.zip` contains `HardwareGrowler.app` in a plain ZIP archive. This is usually the easiest artifact to download and unpack.
+- `HardwareGrowler-Universal2.dmg` contains `HardwareGrowler.app` in a compressed disk image. Use this if you prefer a mountable macOS disk image.
+
+The release artifacts are ad-hoc signed by CI and are not Apple-notarized. They are suitable for open source distribution and local re-signing, but they will not have the same first-launch experience as a Developer ID signed and notarized app.
+
+### Automated GitHub Releases
+
+Push an annotated tag named `hardwaregrowler-v<version>` to build and publish a GitHub release:
+
+```sh
+git tag -a hardwaregrowler-v1.0.0 -m "HardwareGrowler 1.0.0"
+git push origin hardwaregrowler-v1.0.0
+```
+
+The release workflow:
+
+1. Runs the HardwareGrowler verifier.
+2. Packages ZIP and DMG artifacts.
+3. Creates release notes from the commit messages since the previous `hardwaregrowler-v*` tag.
+4. Adds a link to the full commit comparison.
+5. Publishes the ZIP and DMG to the GitHub release.
+
+You can also run the `HardwareGrowler Release` workflow manually for an existing `hardwaregrowler-v*` tag.
+
+For normal Gatekeeper-friendly public distribution, notarize the ZIP, DMG, or PKG before sharing it.
+
+## Using Downloaded Release Artifacts
+
+Because the GitHub release artifacts are not notarized by Apple, macOS may warn when you open the downloaded app. You can re-sign the app for your own Mac with a trusted local code-signing certificate.
+
+First create and trust a local code-signing certificate as described in [Option 2: Self-Signed Local Certificate](#option-2-self-signed-local-certificate). Then copy the downloaded app to a stable location:
+
+```sh
+ditto HardwareGrowler.app /Applications/HardwareGrowler.app
+```
+
+Re-sign the app with your local identity:
+
+```sh
+codesign \
+  --force \
+  --deep \
+  --sign "HardwareGrowler Local Code Signing" \
+  --timestamp=none \
+  --preserve-metadata=entitlements \
+  /Applications/HardwareGrowler.app
+```
+
+Verify the local signature:
+
+```sh
+codesign --verify --deep --strict --verbose=2 /Applications/HardwareGrowler.app
+```
+
+Check the local Gatekeeper assessment:
+
+```sh
+spctl --assess --type execute --verbose /Applications/HardwareGrowler.app
+```
+
+If the downloaded app still carries quarantine metadata from the browser, macOS may continue to treat it as an internet download. After you have inspected the artifact and decided to trust your local build, remove the quarantine attribute:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/HardwareGrowler.app
+```
+
+This local self-signing process does not make the app trusted for other people. Each user would need to trust their own local certificate and re-sign locally. Developer ID signing and notarization are still required for the normal public macOS download experience.
 
 ## Verify Signing
 

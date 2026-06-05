@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - ".github/workflows/hardwaregrowler.yml"
+      - ".github/workflows/hardwaregrowler-release.yml"
       - "Common/**"
       - "Core/**"
       - "Extras/HardwareGrowler/**"
@@ -11,6 +12,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/hardwaregrowler.yml"
+      - ".github/workflows/hardwaregrowler-release.yml"
       - "Common/**"
       - "Core/**"
       - "Extras/HardwareGrowler/**"
