@@ -302,9 +302,9 @@ Permissions are tied to the app's bundle identifier and code signature. If you r
 For clean permission testing during development, reset the relevant privacy decisions before launching the rebuilt app:
 
 ```sh
-tccutil reset Location com.growl.HardwareGrowler
-tccutil reset BluetoothAlways com.growl.HardwareGrowler
-tccutil reset Accessibility com.growl.HardwareGrowler
+tccutil reset Location com.growl.hardwaregrowler
+tccutil reset BluetoothAlways com.growl.hardwaregrowler
+tccutil reset Accessibility com.growl.hardwaregrowler
 ```
 
 Notification authorization is managed in System Settings > Notifications. If a `tccutil` service name is rejected on your macOS version, reset that category manually in System Settings > Privacy & Security.
@@ -402,6 +402,26 @@ codesign -dv /Applications/HardwareGrowler.app
 ### Wi-Fi SSID is empty
 
 macOS requires Location permission for Wi-Fi SSID/BSSID access. Enable Location Services for HardwareGrowler in System Settings > Privacy & Security > Location Services. This permission is only used to read the current Wi-Fi network identity for network change notifications.
+
+### Bluetooth device name is not the custom name
+
+HardwareGrowler uses public `IOBluetooth` APIs for Bluetooth device names. If a Bluetooth notification shows a generic product name instead of the custom name shown in System Settings, enable temporary Bluetooth name diagnostics:
+
+```sh
+defaults write com.growl.hardwaregrowler HWGBluetoothNameDiagnostics -bool YES
+```
+
+Restart HardwareGrowler, reproduce the Bluetooth connect or disconnect event, then inspect the diagnostics file:
+
+```sh
+tail -f ~/Library/Logs/HardwareGrowler/BluetoothNameDiagnostics.log
+```
+
+The app currently also recognizes the older `com.growl.HardwareGrowler` preference domain as a temporary compatibility fallback, but new diagnostics should use the lowercase `com.growl.hardwaregrowler` bundle identifier. Disable the extra unified-log logging afterwards:
+
+```sh
+defaults delete com.growl.hardwaregrowler HWGBluetoothNameDiagnostics
+```
 
 ### Keyboard Monitor asks for Accessibility
 

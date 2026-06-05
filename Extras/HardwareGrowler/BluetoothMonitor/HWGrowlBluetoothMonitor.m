@@ -7,9 +7,11 @@
 //
 
 #import "HWGrowlBluetoothMonitor.h"
+#import "HWBluetoothMonitorUtilities.h"
 #import "../HardwareGrowler/HWSystemSettingsRoutes.h"
 #import <stdlib.h>
 #import <IOBluetooth/IOBluetooth.h>
+#import <os/log.h>
 
 static NSString * const HWGBluetoothSymbolName = @"antenna.radiowaves.left.and.right";
 
@@ -31,6 +33,10 @@ static NSString * const HWGBluetoothSymbolName = @"antenna.radiowaves.left.and.r
 - (void)postBluetoothConnectionForDevice:(IOBluetoothDevice *)device;
 - (void)bluetoothPowerStateChanged:(NSNotification *)notification;
 - (void)notifyBluetoothPoweredOn:(BOOL)poweredOn;
+- (BOOL)bluetoothNameDiagnosticsEnabled;
+- (NSString *)bluetoothNameDiagnosticsLogFilePath;
+- (void)appendBluetoothNameDiagnosticsLine:(NSString *)line;
+- (void)logBluetoothNameDiagnosticsForDevice:(IOBluetoothDevice *)device eventName:(NSString *)eventName;
 
 @end
 
@@ -60,6 +66,10 @@ static NSString * const HWGBluetoothSymbolName = @"antenna.radiowaves.left.and.r
 }
 
 -(void)startObserving {
+	[self appendBluetoothNameDiagnosticsLine:[NSString stringWithFormat:@"Bluetooth monitor startObserving; diagnosticsEnabled=%@; logFile=%@",
+											  [self bluetoothNameDiagnosticsEnabled] ? @"YES" : @"NO",
+											  [self bluetoothNameDiagnosticsLogFilePath]]];
+	
 	if (!self.connectionNotification) {
 		self.starting = YES;
 		self.connectionNotification = [IOBluetoothDevice registerForConnectNotifications:self
@@ -99,18 +109,19 @@ static NSString * const HWGBluetoothSymbolName = @"antenna.radiowaves.left.and.r
 
 -(void)bluetoothDevice:(IOBluetoothDevice*)device connected:(BOOL)connected {
 	NSString *title = connected ? NSLocalizedString(@"Bluetooth Connection", @"") : NSLocalizedString(@"Bluetooth Disconnection", @"");
-		
-	    NSData *iconData = HWGPNGDataForSystemSymbol(HWGBluetoothSymbolName, nil);
-	    
-	[delegate notifyWithName:connected ? @"BluetoothConnected" : @"BluetoothDisconnected"
-							 title:title
-						 description:[self notificationDescriptionForBluetoothDevice:device connected:connected]
-							  icon:iconData
-				  identifierString:[self notificationIdentifierForBluetoothDevice:device]
-					  contextString:HWGBluetoothSettingsURLString
-							plugin:self];
+	NSString *description = [self notificationDescriptionForBluetoothDevice:device connected:connected];
+	NSData *iconData = HWGPNGDataForSystemSymbol(HWGBluetoothSymbolName, nil);
 	
-		}
+	[self logBluetoothNameDiagnosticsForDevice:device eventName:connected ? @"notification-send-connected" : @"notification-send-disconnected"];
+	
+	[delegate notifyWithName:connected ? @"BluetoothConnected" : @"BluetoothDisconnected"
+					   title:title
+				 description:description
+						icon:iconData
+			identifierString:[self notificationIdentifierForBluetoothDevice:device]
+				contextString:HWGBluetoothSettingsURLString
+					  plugin:self];
+}
 
 -(void)bluetoothPowerStateChanged:(NSNotification *)notification {
 	if ([[notification name] isEqualToString:IOBluetoothHostControllerPoweredOnNotification]) {
@@ -133,7 +144,7 @@ static NSString * const HWGBluetoothSymbolName = @"antenna.radiowaves.left.and.r
 					  plugin:self];
 }
 
-		-(NSString *)displayNameForBluetoothDevice:(IOBluetoothDevice *)device {
+-(NSString *)displayNameForBluetoothDevice:(IOBluetoothDevice *)device {
 	NSString *name = [device name];
 	if (![name length])
 		name = [self knownNameForBluetoothDevice:device];
@@ -141,7 +152,7 @@ static NSString * const HWGBluetoothSymbolName = @"antenna.radiowaves.left.and.r
 		name = [device nameOrAddress];
 	if (![name length])
 		name = [device addressString];
-	return [name length] ? name : NSLocalizedString(@"Unknown Bluetooth Device", @"Unknown Bluetooth device notification fallback");
+	return [name length] ? name : HWGBluetoothUnknownDeviceDisplayName();
 }
 
 -(NSString *)knownNameForBluetoothDevice:(IOBluetoothDevice *)device {
@@ -159,7 +170,7 @@ static NSString * const HWGBluetoothSymbolName = @"antenna.radiowaves.left.and.r
 		return nil;
 	
 	for (IOBluetoothDevice *knownDevice in devices) {
-		if ([[knownDevice addressString] isEqualToString:address] && [[knownDevice name] length])
+		if (HWGBluetoothAddressStringsMatch([knownDevice addressString], address) && [[knownDevice name] length])
 			return [knownDevice name];
 	}
 	return nil;
@@ -185,8 +196,81 @@ static NSString * const HWGBluetoothSymbolName = @"antenna.radiowaves.left.and.r
 }
 
 -(BOOL)hasDisplayableNameForBluetoothDevice:(IOBluetoothDevice *)device {
+	return HWGBluetoothDisplayNameIsKnown([self displayNameForBluetoothDevice:device]);
+}
+
+-(BOOL)bluetoothNameDiagnosticsEnabled {
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	if ([defaults boolForKey:@"HWGBluetoothNameDiagnostics"])
+		return YES;
+	
+	/* HardwareGrowler has used both bundle-id spellings over time. Check both
+	   while diagnostics are temporary so local investigation is not blocked by
+	   a preference-domain mismatch. */
+	NSArray *applicationIDs = [NSArray arrayWithObjects:@"com.growl.hardwaregrowler", @"com.growl.HardwareGrowler", nil];
+	for (NSString *applicationID in applicationIDs) {
+		CFPropertyListRef value = CFPreferencesCopyAppValue(CFSTR("HWGBluetoothNameDiagnostics"), (CFStringRef)applicationID);
+		if (value) {
+			BOOL enabled = CFGetTypeID(value) == CFBooleanGetTypeID() && CFBooleanGetValue((CFBooleanRef)value);
+			CFRelease(value);
+			if (enabled)
+				return YES;
+		}
+	}
+	
+	return NO;
+}
+
+-(NSString *)bluetoothNameDiagnosticsLogFilePath {
+	NSString *logsDirectoryPath = [[[NSHomeDirectory() stringByAppendingPathComponent:@"Library"] stringByAppendingPathComponent:@"Logs"] stringByAppendingPathComponent:@"HardwareGrowler"];
+	return [logsDirectoryPath stringByAppendingPathComponent:@"BluetoothNameDiagnostics.log"];
+}
+
+-(void)appendBluetoothNameDiagnosticsLine:(NSString *)line {
+	if (![line length])
+		return;
+	
+	NSString *logFilePath = [self bluetoothNameDiagnosticsLogFilePath];
+	NSString *directoryPath = [logFilePath stringByDeletingLastPathComponent];
+	NSFileManager *fileManager = [NSFileManager defaultManager];
+	NSError *error = nil;
+	
+	if (![fileManager createDirectoryAtPath:directoryPath withIntermediateDirectories:YES attributes:nil error:&error]) {
+		NSLog(@"Unable to create Bluetooth diagnostics log directory %@: %@", directoryPath, error);
+		return;
+	}
+	
+	if (![fileManager fileExistsAtPath:logFilePath] && ![fileManager createFileAtPath:logFilePath contents:nil attributes:nil]) {
+		NSLog(@"Unable to create Bluetooth diagnostics log file %@", logFilePath);
+		return;
+	}
+	
+	NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:logFilePath];
+	if (!fileHandle) {
+		NSLog(@"Unable to open Bluetooth diagnostics log file %@", logFilePath);
+		return;
+	}
+	
+	NSString *timestampedLine = [NSString stringWithFormat:@"%@ %@\n", [[NSDate date] descriptionWithLocale:nil], line];
+	NSData *lineData = [timestampedLine dataUsingEncoding:NSUTF8StringEncoding];
+	[fileHandle seekToEndOfFile];
+	[fileHandle writeData:lineData];
+	[fileHandle closeFile];
+}
+
+-(void)logBluetoothNameDiagnosticsForDevice:(IOBluetoothDevice *)device eventName:(NSString *)eventName {
+	NSString *name = [device name];
+	NSString *knownName = [self knownNameForBluetoothDevice:device];
+	NSString *nameOrAddress = [device nameOrAddress];
+	NSString *address = [device addressString];
 	NSString *displayName = [self displayNameForBluetoothDevice:device];
-	return [displayName length] && ![displayName isEqualToString:NSLocalizedString(@"Unknown Bluetooth Device", @"Unknown Bluetooth device notification fallback")];
+	BOOL diagnosticsEnabled = [self bluetoothNameDiagnosticsEnabled];
+	NSString *diagnostics = HWGBluetoothNameDiagnosticsDescription(eventName, name, knownName, nameOrAddress, address, displayName);
+	[self appendBluetoothNameDiagnosticsLine:[NSString stringWithFormat:@"diagnosticsEnabled=%@ %@", diagnosticsEnabled ? @"YES" : @"NO", diagnostics]];
+	if (diagnosticsEnabled) {
+		os_log_with_type(OS_LOG_DEFAULT, OS_LOG_TYPE_DEFAULT, "%{public}@", diagnostics);
+		NSLog(@"%@", diagnostics);
+	}
 }
 
 -(void)postBluetoothConnectionForDevice:(IOBluetoothDevice *)device {
@@ -196,6 +280,7 @@ static NSString * const HWGBluetoothSymbolName = @"antenna.radiowaves.left.and.r
 -(void)bluetoothDisconnection:(IOBluetoothUserNotification*)note 
 							  device:(IOBluetoothDevice*)device
 {
+	[self logBluetoothNameDiagnosticsForDevice:device eventName:@"live-disconnect"];
 	[self bluetoothDevice:device connected:NO];
 	[note unregister];
 		
@@ -204,6 +289,7 @@ static NSString * const HWGBluetoothSymbolName = @"antenna.radiowaves.left.and.r
 -(void)bluetoothConnection:(IOBluetoothUserNotification*)note 
 						  device:(IOBluetoothDevice*)device 
 {
+	[self logBluetoothNameDiagnosticsForDevice:device eventName:starting ? @"startup-connect" : @"live-connect"];
 	if (!starting || [delegate onLaunchEnabled]) {
 		if ([self hasDisplayableNameForBluetoothDevice:device]) {
 			[self bluetoothDevice:device connected:YES];
@@ -226,6 +312,7 @@ static NSString * const HWGBluetoothSymbolName = @"antenna.radiowaves.left.and.r
 
 -(void)remoteNameRequestComplete:(IOBluetoothDevice *)device status:(IOReturn)status
 {
+	[self logBluetoothNameDiagnosticsForDevice:device eventName:@"remote-name-complete"];
 	NSString *identifier = [self notificationIdentifierForBluetoothDevice:device];
 	if ([identifier length])
 		[pendingNameRequestIdentifiers removeObject:identifier];

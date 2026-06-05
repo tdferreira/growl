@@ -2,6 +2,7 @@
 
 #import "../HardwareGrowler/HWNotificationAdapter.h"
 #import "../HardwareGrowler/HardwareGrowlPlugin.h"
+#import "../BluetoothMonitor/HWBluetoothMonitorUtilities.h"
 
 @interface HWNotificationRoutingAvailablePlugin : NSObject
 @end
@@ -95,6 +96,57 @@
 	
 	XCTAssertFalse(HWGPluginShouldBeDisabled(plugin, @"test.plugin", storedEnabled));
 	XCTAssertTrue(HWGPluginShouldBeDisabled(plugin, @"test.plugin", storedDisabled));
+}
+
+- (void)testBluetoothDisplayNamePrefersLiveNameThenKnownNameThenAddress
+{
+	XCTAssertEqualObjects(HWGBluetoothDisplayNameFromValues(@"Alex's AirPods 4 (ANC)", @"AirPods 4 (ANC)", @"AA-BB", @"AA-BB"), @"Alex's AirPods 4 (ANC)");
+	XCTAssertEqualObjects(HWGBluetoothDisplayNameFromValues(nil, @"Alex's AirPods 4 (ANC)", @"AA-BB", @"AA-BB"), @"Alex's AirPods 4 (ANC)");
+	XCTAssertEqualObjects(HWGBluetoothDisplayNameFromValues(@"Headphones", nil, @"AA-BB", @"AA-BB"), @"Headphones");
+	XCTAssertEqualObjects(HWGBluetoothDisplayNameFromValues(nil, nil, @"AA-BB", @"CC-DD"), @"AA-BB");
+	XCTAssertEqualObjects(HWGBluetoothDisplayNameFromValues(nil, nil, nil, @"CC-DD"), @"CC-DD");
+}
+
+- (void)testBluetoothDisplayNameFallsBackToUnknownWhenNoIdentityIsAvailable
+{
+	NSString *displayName = HWGBluetoothDisplayNameFromValues(@"  ", nil, @"", nil);
+	
+	XCTAssertEqualObjects(displayName, HWGBluetoothUnknownDeviceDisplayName());
+	XCTAssertFalse(HWGBluetoothDisplayNameIsKnown(displayName));
+	XCTAssertTrue(HWGBluetoothDisplayNameIsKnown(@"Mouse"));
+}
+
+- (void)testBluetoothAddressNormalizationIgnoresSeparatorsAndCase
+{
+	XCTAssertEqualObjects(HWGBluetoothNormalizedAddressString(@"AA-BB-CC-DD-EE-FF"), @"aabbccddeeff");
+	XCTAssertEqualObjects(HWGBluetoothNormalizedAddressString(@"aa:bb:cc:dd:ee:ff"), @"aabbccddeeff");
+	XCTAssertTrue(HWGBluetoothAddressStringsMatch(@"AA-BB-CC-DD-EE-FF", @"aa:bb:cc:dd:ee:ff"));
+}
+
+- (void)testBluetoothAddressNormalizationRejectsMissingAddresses
+{
+	XCTAssertNil(HWGBluetoothNormalizedAddressString(nil));
+	XCTAssertNil(HWGBluetoothNormalizedAddressString(@" - : "));
+	XCTAssertNil(HWGBluetoothNormalizedAddressString(@"AirPods"));
+	XCTAssertFalse(HWGBluetoothAddressStringsMatch(nil, @"aa:bb:cc:dd:ee:ff"));
+}
+
+- (void)testBluetoothDisplayNameKeepsLiveNameWhenKnownNameDiffers
+{
+	XCTAssertEqualObjects(HWGBluetoothDisplayNameFromValues(@"Mouse", @"Keyboard", nil, nil), @"Mouse");
+}
+
+- (void)testBluetoothNameDiagnosticsIncludesPublicAPISources
+{
+	NSString *diagnostics = HWGBluetoothNameDiagnosticsDescription(@"live-connect",
+																   @"AirPods 4 (ANC)",
+																   @"Alex's AirPods 4 (ANC)",
+																   @"AA-BB",
+																   @"AA-BB",
+																   @"Alex's AirPods 4 (ANC)");
+	
+	XCTAssertTrue([diagnostics rangeOfString:@"live-connect"].location != NSNotFound);
+	XCTAssertTrue([diagnostics rangeOfString:@"Alex's AirPods 4 (ANC)"].location != NSNotFound);
 }
 
 @end
