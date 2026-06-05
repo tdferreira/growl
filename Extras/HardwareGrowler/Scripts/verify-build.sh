@@ -46,6 +46,7 @@ log "Building Release Universal 2 app"
 # Capture the Release build log without a pipe. Some GitHub macOS runners have
 # reported a non-zero pipeline status after xcodebuild printed BUILD SUCCEEDED;
 # keeping xcodebuild as the direct command makes the failure signal unambiguous.
+mkdir -p "$DERIVED_UNIVERSAL"
 if xcodebuild \
 		-project "$PROJECT" \
 		-scheme HardwareGrowler \
