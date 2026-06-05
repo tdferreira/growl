@@ -106,6 +106,29 @@ static inline NSData *HWGPNGDataForSystemSymbol(NSString *symbolName, NSString *
 
 @end
 
+static inline BOOL HWGPluginIsAvailable(id plugin)
+{
+	return ![plugin respondsToSelector:@selector(isAvailable)] || [plugin isAvailable];
+}
+
+static inline BOOL HWGPluginDictionaryIsDisabled(NSDictionary *pluginDictionary)
+{
+	return [[pluginDictionary objectForKey:@"disabled"] boolValue];
+}
+
+static inline BOOL HWGPluginShouldBeDisabled(id plugin, NSString *bundleIdentifier, NSDictionary *disabledPlugins)
+{
+	NSNumber *storedDisabled = [disabledPlugins objectForKey:bundleIdentifier];
+	if (storedDisabled)
+		return [storedDisabled boolValue];
+	return [plugin respondsToSelector:@selector(enabledByDefault)] && ![plugin enabledByDefault];
+}
+
+static inline BOOL HWGPluginMatchesClassName(id plugin, NSString *pluginClassName)
+{
+	return [pluginClassName length] && [NSStringFromClass([plugin class]) isEqualToString:pluginClassName];
+}
+
 @protocol HWGrowlPluginNotifierProtocol <NSObject>
 @required
 -(NSArray*)noteNames;

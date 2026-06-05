@@ -12,6 +12,8 @@ The main app, helper, and every plug-in must be built for compatible architectur
 
 The app currently ships the actively supported monitors: USB, Bluetooth, Volume, Network, Power, Keyboard, Thunderbolt, TimeMachine, and FireWire. The legacy Phone monitor remains in the source tree, but is not embedded in the app by default. FireWire is hidden at runtime on Macs that do not expose FireWire IORegistry services.
 
+Network Monitor is enabled by default because network changes are one of HardwareGrowler's core use cases. It can monitor generic IP address, VPN, and network interface changes without Location permission. Location permission is only requested when a Wi-Fi/AirPort notification path needs the current SSID/BSSID.
+
 ## Requirements
 
 Required:
@@ -259,22 +261,41 @@ If you have old copies in other locations, remove or rename them before testing.
 
 ## First Launch Permissions
 
-On first launch, macOS may ask for permissions depending on which modules are enabled.
+On first launch, macOS may ask for permissions depending on which modules are enabled. HardwareGrowler does not need every permission for every feature; macOS prompts are tied to the monitor that uses the protected API.
 
-Expected prompts include:
+| Permission | Used By | Why It Is Needed | If You Deny It |
+| --- | --- | --- | --- |
+| Notifications | Main app | Required to show native macOS notifications through `UNUserNotificationCenter`. | Monitors can still detect events, but you will not see notification banners/alerts. |
+| Location | Network Monitor | Modern macOS treats Wi-Fi network names and BSSIDs as location-sensitive. HardwareGrowler requests Location only so CoreWLAN can read the current Wi-Fi SSID/BSSID for Wi-Fi connect notifications. It does not use GPS tracking. | Generic network notifications may still work, but Wi-Fi notifications may show `Unknown` or omit the SSID/BSSID. |
+| Bluetooth | Bluetooth Monitor | Required by macOS when using Bluetooth APIs to observe Bluetooth power and device connection changes. | Bluetooth notifications may not work. Other monitors are unaffected. |
+| Accessibility | Keyboard Monitor | Needed only if the Keyboard Monitor is enabled and macOS requires accessibility access for observing keyboard state such as Caps Lock, Shift, or Fn. | Keyboard state notifications may not work. Other monitors are unaffected. |
 
-- Notifications, for native notification delivery.
-- Location, for Wi-Fi SSID access through CoreWLAN/CoreLocation.
-- Bluetooth, for Bluetooth monitoring.
-- Accessibility, only if the Keyboard Monitor is enabled and needs keyboard state access.
+The expected prompt timing is:
+
+- Notification permission can appear when HardwareGrowler starts posting native notifications.
+- Location permission should appear only when the enabled Network Monitor handles a Wi-Fi/AirPort event that needs SSID/BSSID access.
+- Bluetooth permission should appear only when the Bluetooth Monitor is enabled or starts observing Bluetooth state.
+- Accessibility permission should appear only after the Keyboard Monitor is enabled and starts observing keyboard state.
 
 FireWire availability is checked with a read-only IOKit/IORegistry query and should not require a special privacy permission.
+
+USB, Volume, Thunderbolt, Power, Time Machine, and FireWire monitoring should not need Location, Bluetooth, or Accessibility permission. Some of those monitors use system frameworks or IOKit, but they are not expected to trigger macOS privacy prompts beyond notification delivery.
 
 Permissions are tied to the app's bundle identifier and code signature. If you rebuild with a different signature or run the app from a different path, macOS may treat it as a different app. For the least surprising behavior, install it consistently at:
 
 ```text
 /Applications/HardwareGrowler.app
 ```
+
+For clean permission testing during development, reset the relevant privacy decisions before launching the rebuilt app:
+
+```sh
+tccutil reset Location com.growl.HardwareGrowler
+tccutil reset BluetoothAlways com.growl.HardwareGrowler
+tccutil reset Accessibility com.growl.HardwareGrowler
+```
+
+Notification authorization is managed in System Settings > Notifications. If a `tccutil` service name is rejected on your macOS version, reset that category manually in System Settings > Privacy & Security.
 
 ## Package
 
@@ -369,7 +390,7 @@ codesign -dv /Applications/HardwareGrowler.app
 
 ### Wi-Fi SSID is empty
 
-macOS requires Location permission for Wi-Fi SSID access. Enable Location Services for HardwareGrowler in System Settings > Privacy & Security > Location Services.
+macOS requires Location permission for Wi-Fi SSID/BSSID access. Enable Location Services for HardwareGrowler in System Settings > Privacy & Security > Location Services. This permission is only used to read the current Wi-Fi network identity for network change notifications.
 
 ### Keyboard Monitor asks for Accessibility
 

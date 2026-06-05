@@ -9,6 +9,10 @@
 #import <Foundation/Foundation.h>
 #import "HardwareGrowlPlugin.h"
 
+typedef void (^HWGLocationAuthorizationRequester)(void);
+
 @interface HWGrowlNetworkMonitor : NSObject <HWGrowlPluginProtocol, HWGrowlPluginNotifierProtocol>
+
+@property (nonatomic, copy) HWGLocationAuthorizationRequester locationAuthorizationRequester;
 
 @end

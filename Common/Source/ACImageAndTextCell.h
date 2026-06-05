@@ -16,5 +16,5 @@
 - (void) drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
 - (NSSize) cellSize;
 
-@property (nonatomic, retain) NSImage *image;
+@property (retain) NSImage *image;
 @end

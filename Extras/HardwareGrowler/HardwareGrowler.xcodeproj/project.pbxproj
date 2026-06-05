@@ -111,6 +111,22 @@
 		D0A0000818BCA00000000000 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A0000718BCA00000000000 /* UserNotifications.framework */; };
 		D0B0000418BCA10000000000 /* HWImageHelperTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B0000118BCA10000000000 /* HWImageHelperTests.m */; };
 		D0B0001218BCA10000000000 /* HWNetworkMonitorUtilitiesTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B0001118BCA10000000000 /* HWNetworkMonitorUtilitiesTests.m */; };
+		D0B0001A18BCA10000000000 /* HWNotificationRoutingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B0001B18BCA10000000000 /* HWNotificationRoutingTests.m */; };
+		D0B0001C18BCA10000000000 /* HWSystemSettingsRoutesTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B0001D18BCA10000000000 /* HWSystemSettingsRoutesTests.m */; };
+		D0B0001E18BCA10000000000 /* HWVolumeMonitorUtilitiesTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B0001F18BCA10000000000 /* HWVolumeMonitorUtilitiesTests.m */; };
+		D0B0002118BCA10000000000 /* HWAppIconVisibilityTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B0002018BCA10000000000 /* HWAppIconVisibilityTests.m */; };
+		D0B0002318BCA10000000000 /* HWNetworkMonitorPermissionTimingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B0002218BCA10000000000 /* HWNetworkMonitorPermissionTimingTests.m */; };
+		D0B0002418BCA10000000000 /* HWGrowlNetworkMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = BCB807691551A7510088C69A /* HWGrowlNetworkMonitor.m */; };
+		D0B0002518BCA10000000000 /* GrowlNetworkUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = BCECA36A1552D24C00F49280 /* GrowlNetworkUtilities.m */; };
+		D0B0002618BCA10000000000 /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = BCECA3631552D1C500F49280 /* NSStringAdditions.m */; };
+		D0B0002718BCA10000000000 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCECA3661552D1FA00F49280 /* SystemConfiguration.framework */; };
+		D0B0002818BCA10000000000 /* CoreWLAN.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A0001518BCA00000000000 /* CoreWLAN.framework */; };
+		D0B0002918BCA10000000000 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A0001718BCA00000000000 /* CoreLocation.framework */; };
+		D0B0003018BCA10000000000 /* HWNotificationAdapterResponseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B0003118BCA10000000000 /* HWNotificationAdapterResponseTests.m */; };
+		D0B0003218BCA10000000000 /* HWLoginItemUtilitiesTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B0003318BCA10000000000 /* HWLoginItemUtilitiesTests.m */; };
+		D0B0003418BCA10000000000 /* HWFireWireAvailabilityTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B0003518BCA10000000000 /* HWFireWireAvailabilityTests.m */; };
+		D0B0003618BCA10000000000 /* HWNotificationAdapter.m in Sources */ = {isa = PBXBuildFile; fileRef = D0A0000218BCA00000000000 /* HWNotificationAdapter.m */; };
+		D0B0003718BCA10000000000 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A0000718BCA00000000000 /* UserNotifications.framework */; };
 		D0B0000618BCA10000000000 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0B0000518BCA10000000000 /* XCTest.framework */; };
 		D0B0000718BCA10000000000 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EE155153330088C69A /* AppKit.framework */; };
 		BCB806B015515C4E0088C69A /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BCB805EE155153330088C69A /* AppKit.framework */; };
@@ -552,6 +568,16 @@
 		D0B0000518BCA10000000000 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		D0B0001118BCA10000000000 /* HWNetworkMonitorUtilitiesTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWNetworkMonitorUtilitiesTests.m; sourceTree = "<group>"; };
 		D0B0001318BCA10000000000 /* HWNetworkMonitorUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HWNetworkMonitorUtilities.h; sourceTree = "<group>"; };
+		D0B0001B18BCA10000000000 /* HWNotificationRoutingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWNotificationRoutingTests.m; sourceTree = "<group>"; };
+		D0B0001D18BCA10000000000 /* HWSystemSettingsRoutesTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWSystemSettingsRoutesTests.m; sourceTree = "<group>"; };
+		D0B0001F18BCA10000000000 /* HWVolumeMonitorUtilitiesTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWVolumeMonitorUtilitiesTests.m; sourceTree = "<group>"; };
+		D0B0002018BCA10000000000 /* HWAppIconVisibilityTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWAppIconVisibilityTests.m; sourceTree = "<group>"; };
+		D0B0002218BCA10000000000 /* HWNetworkMonitorPermissionTimingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWNetworkMonitorPermissionTimingTests.m; sourceTree = "<group>"; };
+		D0B0003118BCA10000000000 /* HWNotificationAdapterResponseTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWNotificationAdapterResponseTests.m; sourceTree = "<group>"; };
+		D0B0003318BCA10000000000 /* HWLoginItemUtilitiesTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWLoginItemUtilitiesTests.m; sourceTree = "<group>"; };
+		D0B0003518BCA10000000000 /* HWFireWireAvailabilityTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWFireWireAvailabilityTests.m; sourceTree = "<group>"; };
+		D0B0003818BCA10000000000 /* HWLoginItemUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HWLoginItemUtilities.h; sourceTree = "<group>"; };
+		D0B0003918BCA10000000000 /* HWFireWireAvailability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HWFireWireAvailability.h; sourceTree = "<group>"; };
 		BCD47568156BCDD000F81910 /* ACImageAndTextCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ACImageAndTextCell.h; path = ../../../Common/Source/ACImageAndTextCell.h; sourceTree = "<group>"; };
 		BCD47569156BCDD000F81910 /* ACImageAndTextCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ACImageAndTextCell.m; path = ../../../Common/Source/ACImageAndTextCell.m; sourceTree = "<group>"; };
 		BCE3BC1A15C9619000B0BFFB /* TMSliderControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TMSliderControl.h; path = ../../../external_dependencies/tmslidercontrol/TMSliderControl.h; sourceTree = "<group>"; };
@@ -705,6 +731,10 @@
 			files = (
 				D0B0000718BCA10000000000 /* AppKit.framework in Frameworks */,
 				D0B0000618BCA10000000000 /* XCTest.framework in Frameworks */,
+				D0B0002718BCA10000000000 /* SystemConfiguration.framework in Frameworks */,
+				D0B0002818BCA10000000000 /* CoreWLAN.framework in Frameworks */,
+				D0B0002918BCA10000000000 /* CoreLocation.framework in Frameworks */,
+				D0B0003718BCA10000000000 /* UserNotifications.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -920,6 +950,7 @@
 			children = (
 				BCA26BA31555B46F009C5ABC /* HWGrowlFirewireMonitor.h */,
 				BCA26BA41555B46F009C5ABC /* HWGrowlFirewireMonitor.m */,
+				D0B0003918BCA10000000000 /* HWFireWireAvailability.h */,
 				BCA26B8A1555B3F5009C5ABC /* Supporting Files */,
 			);
 			name = FirewireMonitor;
@@ -1031,6 +1062,7 @@
 				D0A0000218BCA00000000000 /* HWNotificationAdapter.m */,
 				D0A0000418BCA00000000000 /* HWLoginItemController.h */,
 				D0A0000518BCA00000000000 /* HWLoginItemController.m */,
+				D0B0003818BCA10000000000 /* HWLoginItemUtilities.h */,
 				BCB807701551AB500088C69A /* External */,
 				BCB805F2155153330088C69A /* Supporting Files */,
 			);
@@ -1127,6 +1159,14 @@
 			children = (
 				D0B0000118BCA10000000000 /* HWImageHelperTests.m */,
 				D0B0001118BCA10000000000 /* HWNetworkMonitorUtilitiesTests.m */,
+				D0B0001B18BCA10000000000 /* HWNotificationRoutingTests.m */,
+				D0B0001D18BCA10000000000 /* HWSystemSettingsRoutesTests.m */,
+				D0B0001F18BCA10000000000 /* HWVolumeMonitorUtilitiesTests.m */,
+				D0B0002018BCA10000000000 /* HWAppIconVisibilityTests.m */,
+				D0B0002218BCA10000000000 /* HWNetworkMonitorPermissionTimingTests.m */,
+				D0B0003118BCA10000000000 /* HWNotificationAdapterResponseTests.m */,
+				D0B0003318BCA10000000000 /* HWLoginItemUtilitiesTests.m */,
+				D0B0003518BCA10000000000 /* HWFireWireAvailabilityTests.m */,
 				D0B0000218BCA10000000000 /* HardwareGrowlerTests-Info.plist */,
 			);
 			path = HardwareGrowlerTests;
@@ -2007,6 +2047,18 @@
 			files = (
 				D0B0000418BCA10000000000 /* HWImageHelperTests.m in Sources */,
 				D0B0001218BCA10000000000 /* HWNetworkMonitorUtilitiesTests.m in Sources */,
+				D0B0001A18BCA10000000000 /* HWNotificationRoutingTests.m in Sources */,
+				D0B0001C18BCA10000000000 /* HWSystemSettingsRoutesTests.m in Sources */,
+				D0B0001E18BCA10000000000 /* HWVolumeMonitorUtilitiesTests.m in Sources */,
+				D0B0002118BCA10000000000 /* HWAppIconVisibilityTests.m in Sources */,
+				D0B0002318BCA10000000000 /* HWNetworkMonitorPermissionTimingTests.m in Sources */,
+				D0B0003018BCA10000000000 /* HWNotificationAdapterResponseTests.m in Sources */,
+				D0B0003218BCA10000000000 /* HWLoginItemUtilitiesTests.m in Sources */,
+				D0B0003418BCA10000000000 /* HWFireWireAvailabilityTests.m in Sources */,
+				D0B0003618BCA10000000000 /* HWNotificationAdapter.m in Sources */,
+				D0B0002418BCA10000000000 /* HWGrowlNetworkMonitor.m in Sources */,
+				D0B0002518BCA10000000000 /* GrowlNetworkUtilities.m in Sources */,
+				D0B0002618BCA10000000000 /* NSStringAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

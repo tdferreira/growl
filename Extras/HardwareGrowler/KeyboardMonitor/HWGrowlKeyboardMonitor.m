@@ -228,7 +228,7 @@ self.NAME ## Flag = NAME;
 -(NSView*)preferencePane {
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
-		[NSBundle loadNibNamed:@"KeyboardMonitorPrefs" owner:self];
+		[[NSBundle bundleForClass:[self class]] loadNibNamed:@"KeyboardMonitorPrefs" owner:self topLevelObjects:nil];
 	});
 	return prefsView;
 }

@@ -7,6 +7,7 @@
 //
 
 #import "HWGrowlFirewireMonitor.h"
+#import "HWFireWireAvailability.h"
 #include <IOKit/IOKitLib.h>
 
 @interface HWGrowlFirewireMonitor ()
@@ -32,7 +33,7 @@ static BOOL HWGFireWireServiceExists(const char *serviceClassName)
 	if (!matchingDictionary)
 		return NO;
 	
-	io_service_t service = IOServiceGetMatchingService(kIOMasterPortDefault, matchingDictionary);
+	io_service_t service = IOServiceGetMatchingService(kIOMainPortDefault, matchingDictionary);
 	if (!service)
 		return NO;
 	
@@ -47,19 +48,7 @@ static BOOL HWGFireWireHardwareAvailable(void)
 	if (checked)
 		return available;
 	
-	const char *serviceClassNames[] = {
-		"IOFireWireController",
-		"IOFireWireLocalNode",
-		"AppleFWOHCI",
-		NULL
-	};
-	
-	for (NSUInteger index = 0; serviceClassNames[index] != NULL; index++) {
-		if (HWGFireWireServiceExists(serviceClassNames[index])) {
-			available = YES;
-			break;
-		}
-	}
+	available = HWGFireWireHardwareAvailableWithServiceLookup(HWGFireWireServiceExists);
 	
 	checked = YES;
 	return available;
@@ -95,7 +84,7 @@ static BOOL HWGFireWireHardwareAvailable(void)
 	}
 	
 	self.notificationsArePrimed = NO;
-	self.ioKitNotificationPort = IONotificationPortCreate(kIOMasterPortDefault);
+	self.ioKitNotificationPort = IONotificationPortCreate(kIOMainPortDefault);
 	self.notificationRunLoopSource = IONotificationPortGetRunLoopSource(ioKitNotificationPort);
 	
 	CFRunLoopAddSource(CFRunLoopGetCurrent(),

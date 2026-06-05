@@ -127,7 +127,7 @@
 			imageFrame.origin.y += ceilf((cellFrame.size.height - imageSize.height) * 0.5);
 		}
 
-		[image compositeToPoint:imageFrame.origin operation:NSCompositeSourceOver];
+		[image drawAtPoint:imageFrame.origin fromRect:NSZeroRect operation:NSCompositingOperationSourceOver fraction:1.0];
 	}
 
 	NSAttributedString *string = [self attributedStringValue];

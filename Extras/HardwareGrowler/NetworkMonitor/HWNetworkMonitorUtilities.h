@@ -33,3 +33,49 @@ static inline NSString *HWGNetworkSettingsURLStringForInterfaceName(NSString *in
 {
 	return HWGNetworkInterfaceNameIsVPN(interfaceName) ? HWGVPNSettingsURLString : HWGNetworkSettingsURLString;
 }
+
+static inline NSCharacterSet *HWGNetworkSSIDTrimCharacterSet(void)
+{
+	NSMutableCharacterSet *trimCharacters = [[[NSCharacterSet whitespaceAndNewlineCharacterSet] mutableCopy] autorelease];
+	[trimCharacters formUnionWithCharacterSet:[NSCharacterSet controlCharacterSet]];
+	return trimCharacters;
+}
+
+static inline NSString *HWGNetworkStringFromSSIDValue(id ssidValue)
+{
+	NSCharacterSet *trimCharacters = HWGNetworkSSIDTrimCharacterSet();
+	
+	if ([ssidValue isKindOfClass:[NSString class]]) {
+		NSString *trimmedSSID = [ssidValue stringByTrimmingCharactersInSet:trimCharacters];
+		return [trimmedSSID length] ? trimmedSSID : nil;
+	}
+	
+	if ([ssidValue isKindOfClass:[NSData class]]) {
+		NSString *ssidString = [[[NSString alloc] initWithData:ssidValue encoding:NSUTF8StringEncoding] autorelease];
+		if (!ssidString)
+			ssidString = [[[NSString alloc] initWithData:ssidValue encoding:NSISOLatin1StringEncoding] autorelease];
+		ssidString = [ssidString stringByTrimmingCharactersInSet:trimCharacters];
+		return [ssidString length] ? ssidString : nil;
+	}
+	
+	return nil;
+}
+
+static inline NSString *HWGNetworkStringFromBSSIDValue(id bssidValue)
+{
+	if ([bssidValue isKindOfClass:[NSString class]])
+		return [bssidValue length] ? bssidValue : nil;
+	
+	if ([bssidValue isKindOfClass:[NSData class]] && [bssidValue length] >= 6) {
+		const unsigned char *bssidBytes = [bssidValue bytes];
+		return [NSString stringWithFormat:@"%02X:%02X:%02X:%02X:%02X:%02X",
+				bssidBytes[0],
+				bssidBytes[1],
+				bssidBytes[2],
+				bssidBytes[3],
+				bssidBytes[4],
+				bssidBytes[5]];
+	}
+	
+	return nil;
+}

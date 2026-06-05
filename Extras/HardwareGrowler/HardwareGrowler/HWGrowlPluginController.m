@@ -77,15 +77,11 @@
 					if([plugin conformsToProtocol:@protocol(HWGrowlPluginProtocol)])
 					{
 						[plugin setDelegate:self];
-						if([plugin respondsToSelector:@selector(isAvailable)] && ![plugin isAvailable]) {
+						if(!HWGPluginIsAvailable(plugin)) {
 							[plugin release];
 							return;
 						}
-						BOOL disabled = NO;
-						if(disabledPlugins && [disabledPlugins objectForKey:bundleID])
-							disabled = [[disabledPlugins objectForKey:bundleID] boolValue];
-						else if([plugin respondsToSelector:@selector(enabledByDefault)])
-							disabled = ![plugin enabledByDefault];
+						BOOL disabled = HWGPluginShouldBeDisabled(plugin, bundleID, disabledPlugins);
 						
 						NSMutableDictionary *pluginDict = [NSMutableDictionary dictionaryWithObjectsAndKeys:plugin, @"plugin", 
 																	  [NSNumber numberWithBool:disabled], @"disabled", nil];
@@ -114,7 +110,7 @@
 			
 -(void)startEnabledPlugins {
 	[plugins enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-		if(![[obj objectForKey:@"disabled"] boolValue])
+			if(!HWGPluginDictionaryIsDisabled(obj))
 			[self startPlugin:[obj objectForKey:@"plugin"]];
 	}];
 }
@@ -129,7 +125,7 @@
 
 -(void)fireOnLaunchNotes {
 	[notifiers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-		if(![self pluginDisabled:obj] && [obj respondsToSelector:@selector(fireOnLaunchNotes)])
+			if(![self pluginDisabled:obj] && [obj respondsToSelector:@selector(fireOnLaunchNotes)])
 			[obj fireOnLaunchNotes];
 	}];
 }
@@ -187,7 +183,7 @@ didCloseNotificationForPluginClassName:(NSString *)pluginClassName
 		return;
 	
 	[notifiers enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-		if([NSStringFromClass([obj class]) isEqualToString:pluginClassName]){
+			if(HWGPluginMatchesClassName(obj, pluginClassName)){
 			if([obj respondsToSelector:@selector(noteClosed:byClick:)])
 				[obj noteClosed:context byClick:click];
 			*stop = YES;

@@ -25,9 +25,6 @@
 static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login-helper";
 
 @interface AppDelegate ()
-
-@property (nonatomic, assign) ProcessSerialNumber previousPSN;
-
 @end
 
 @implementation AppDelegate
@@ -60,8 +57,6 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 @synthesize noPrefsLabel;
 @synthesize placeholderView;
 @synthesize currentView;
-
-@synthesize previousPSN;
 
 +(void)initialize
 {
@@ -311,13 +306,13 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 	
 	- (NSString *)moduleDescriptionForPlugin:(id<HWGrowlPluginProtocol>)plugin
 	{
-		NSString *pluginClassName = NSStringFromClass([plugin class]);
-		NSDictionary *descriptions = [NSDictionary dictionaryWithObjectsAndKeys:
-									   NSLocalizedString(@"Watches Bluetooth power changes and device connections.", @"Bluetooth module description"), @"HWGrowlBluetoothMonitor",
-									   NSLocalizedString(@"Watches legacy FireWire devices as they connect or disconnect.", @"FireWire module description"), @"HWGrowlFirewireMonitor",
-									   NSLocalizedString(@"Watches Caps Lock, Shift, and Fn key state changes.", @"Keyboard module description"), @"HWGrowlKeyboardMonitor",
-									   NSLocalizedString(@"Watches Wi-Fi, network interfaces, and IP address changes.", @"Network module description"), @"HWGrowlNetworkMonitor",
-									   NSLocalizedString(@"Watches battery level, charging, and power source changes.", @"Power module description"), @"HWGrowlPowerMonitor",
+	NSString *pluginClassName = NSStringFromClass([plugin class]);
+	NSDictionary *descriptions = [NSDictionary dictionaryWithObjectsAndKeys:
+								   NSLocalizedString(@"Watches Bluetooth power changes and device connections.", @"Bluetooth module description"), @"HWGrowlBluetoothMonitor",
+								   NSLocalizedString(@"Watches legacy FireWire devices as they connect or disconnect.", @"FireWire module description"), @"HWGrowlFirewireMonitor",
+								   NSLocalizedString(@"Watches Caps Lock, Shift, and Fn key state changes.", @"Keyboard module description"), @"HWGrowlKeyboardMonitor",
+								   NSLocalizedString(@"Watches Wi-Fi, network interfaces, VPN, and IP address changes. Wi-Fi network names may require Location permission.", @"Network module description"), @"HWGrowlNetworkMonitor",
+								   NSLocalizedString(@"Watches battery level, charging, and power source changes.", @"Power module description"), @"HWGrowlPowerMonitor",
 									   NSLocalizedString(@"Watches Thunderbolt devices as they connect or disconnect.", @"Thunderbolt module description"), @"HWGrowlThunderboltMonitor",
 									   NSLocalizedString(@"Watches Time Machine backup start, finish, cancel, and failure events.", @"Time Machine module description"), @"HWGrowlTimeMachineMonitor",
 									   NSLocalizedString(@"Watches USB devices as they connect or disconnect.", @"USB module description"), @"HWGrowlUSBMonitor",
@@ -552,13 +547,7 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 	[modulesItem setLabel:NSLocalizedString(@"Modules", @"")];
 	
 	NSNumber *visibility = [[NSUserDefaults standardUserDefaults] objectForKey:@"Visibility"];
-	if(visibility == nil || [visibility integerValue] == kShowIconInDock || [visibility integerValue] == kShowIconInBoth){
-		[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-	}
-	
-	if(visibility == nil || [visibility integerValue] == kShowIconInMenu || [visibility integerValue] == kShowIconInBoth){
-		[self initMenu];
-	}
+	[self applyIconVisibility:visibility ? [visibility integerValue] : kShowIconInMenu];
 	
 	[onLoginSwitch setState:[[[NSUserDefaultsController sharedUserDefaultsController] defaults] boolForKey:@"OnLogin"]];
    [onLoginSwitch addObserver:self 
@@ -575,13 +564,11 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 	[self modernizePreferencesWindow];
 }
 
-#ifndef NSFoundationVersionNumber10_7
-#define NSFoundationVersionNumber10_7   833.1
-#endif
 	- (IBAction)showPreferences:(id)sender
 	{
 		preferencesOpenedAutomatically = NO;
 		[self configurePreferencesAppearance];
+		[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 		[NSApp activateIgnoringOtherApps:YES];
    if(![self.window isVisible]){
       [self.window center];
@@ -589,31 +576,13 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
       [self.window setFrameUsingName:@"HWGrowlerPrefsWindowFrame" force:YES];
 		}
 		[self.window makeKeyAndOrderFront:sender];
-	
-		if((BOOL)isgreaterequal(NSFoundationVersionNumber, NSFoundationVersionNumber10_7)) {
-			ProcessSerialNumber psn = { 0, kCurrentProcess };
-			TransformProcessType(&psn, kProcessTransformToForegroundApplication);
-		NSNotificationCenter *nc = [[NSWorkspace sharedWorkspace] notificationCenter];
-		[nc addObserverForName:NSWorkspaceDidActivateApplicationNotification
-							 object:nil
-							  queue:[NSOperationQueue mainQueue]
-						usingBlock:^(NSNotification *note) {
-							ProcessSerialNumber newFrontPSN;
-							GetFrontProcess(&newFrontPSN);
-							ProcessSerialNumber growlPsn = { 0, kCurrentProcess };
-							Boolean result;
-							SameProcess(&newFrontPSN, &growlPsn, &result);
-							if(!result){
-								GetFrontProcess(&previousPSN);
-							}
-							}];
-		}
 	}
 		
 		- (void)showPreferencesFromAutomaticLaunchOrReopen
 		{
 		BOOL wasVisible = [self.window isVisible];
 		[self configurePreferencesAppearance];
+		[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 		[NSApp activateIgnoringOtherApps:YES];
 		if(!wasVisible){
 			[self.window center];
@@ -627,23 +596,18 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 			[automaticPreferencesOpenDate release];
 			automaticPreferencesOpenDate = [[NSDate date] retain];
 			}
-		}
-	
+	}
+
 	- (void)windowWillClose:(NSNotification *)notification {
-	if((BOOL)isgreaterequal(NSFoundationVersionNumber, NSFoundationVersionNumber10_7)) {
 		NSNumber *value = [[[NSUserDefaultsController sharedUserDefaultsController] defaults] valueForKey:@"Visibility"];
 		HWGrowlIconState visibility = [value integerValue];
-		if(visibility == kDontShowIcon || visibility == kShowIconInMenu){
-			dispatch_async(dispatch_get_main_queue(), ^{
-				ProcessSerialNumber psn = { 0, kCurrentProcess };
-				TransformProcessType(&psn, kProcessTransformToUIElementApplication);
-				SetFrontProcess(&previousPSN);
-			});
-		}
-	}
+		[NSApp setActivationPolicy:HWGIconVisibilityActivationPolicy(visibility)];
 }
 
 - (void) initMenu{
+	if (statusItem)
+		return;
+	
 	statusItem = [[[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength] retain];
 	[statusItem setMenu:statusMenu];
 	
@@ -655,14 +619,29 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 		[icon setTemplate:YES];
 	}
 
-	[statusItem setImage:icon];
-	if ([statusItem respondsToSelector:@selector(button)]) {
-		[[statusItem button] setImage:icon];
-	}
+	NSStatusBarButton *button = [statusItem button];
+	[button setImage:icon];
+	[[button cell] setHighlightsBy:NSContentsCellMask];
 	[icon release];
 	
-	[statusItem setHighlightMode:YES];
-	
+}
+
+- (void)removeStatusItem
+{
+	if (!statusItem)
+		return;
+	[[NSStatusBar systemStatusBar] removeStatusItem:statusItem];
+	[statusItem release];
+	statusItem = nil;
+}
+
+- (void)applyIconVisibility:(HWGrowlIconState)visibility
+{
+	[NSApp setActivationPolicy:HWGIconVisibilityActivationPolicy(visibility)];
+	if (HWGIconVisibilityNeedsStatusItem(visibility, statusItem != nil))
+		[self initMenu];
+	else if (HWGIconVisibilityNeedsStatusItemRemoval(visibility, statusItem != nil))
+		[self removeStatusItem];
 }
 
 - (void) initTitles{
@@ -852,18 +831,20 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 	NSUserDefaultsController *defaultController = [NSUserDefaultsController sharedUserDefaultsController];
 	if([keyPath isEqualToString:@"values.Visibility"])
 	{
-		NSNumber *value = [[defaultController defaults] valueForKey:@"Visibility"];
+		NSNumber *value = [change objectForKey:NSKeyValueChangeNewKey];
+		if (!value || (id)value == [NSNull null])
+			value = [[defaultController values] valueForKey:@"Visibility"];
 		HWGrowlIconState index   = [value integerValue];
 		switch (index) {
 			case kDontShowIcon:
 				if(![[defaultController defaults] boolForKey:@"SuppressNoIconWarn"])
 				{
 					[NSApp activateIgnoringOtherApps:YES];
-					NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Warning! Enabling this option will cause HardwareGrowler to run in the background", nil)
-																defaultButton:NSLocalizedString(@"Ok", nil)
-															 alternateButton:NSLocalizedString(@"Cancel", nil)
-																  otherButton:nil
-												informativeTextWithFormat:NSLocalizedString(@"Enabling this option will cause HardwareGrowler to run without showing a dock icon or a menu item.\n\nTo access preferences, tap HardwareGrowler in Launchpad, or open HardwareGrowler in Finder.", nil)];
+						NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+						[alert setMessageText:NSLocalizedString(@"Warning! Enabling this option will cause HardwareGrowler to run in the background", nil)];
+						[alert setInformativeText:NSLocalizedString(@"Enabling this option will cause HardwareGrowler to run without showing a dock icon or a menu item.\n\nTo access preferences, tap HardwareGrowler in Launchpad, or open HardwareGrowler in Finder.", nil)];
+						[alert addButtonWithTitle:NSLocalizedString(@"Ok", nil)];
+						[alert addButtonWithTitle:NSLocalizedString(@"Cancel", nil)];
 					alert.showsSuppressionButton = YES;
 					NSInteger allow = [alert runModal];
 					if(allow == NSAlertFirstButtonReturn)
@@ -871,43 +852,28 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 						if([[alert suppressionButton] state] == NSControlStateValueOn){
 							[[defaultController defaults] setBool:YES forKey:@"SuppressNoIconWarn"];
 						}
-						[self warnUserAboutIcons];
-						[[NSStatusBar systemStatusBar] removeStatusItem:statusItem];
-						[statusItem release];
-						statusItem = nil;
 					}
 					else
 					{
-						[[defaultController defaults] setInteger:oldIconValue forKey:@"Visibility"];
-						[[defaultController defaults] synchronize];
+						[[defaultController values] setValue:[NSNumber numberWithInteger:oldIconValue] forKey:@"Visibility"];
+						[defaultController save:nil];
 						[iconPopUp selectItemAtIndex:oldIconValue];
+						[self syncModernPreferenceControls];
+						return;
 					}
-				}else{
-					[self warnUserAboutIcons];
-					[[NSStatusBar systemStatusBar] removeStatusItem:statusItem];
-					[statusItem release];
-					statusItem = nil;
 				}
 				break;
 			case kShowIconInBoth:
-				[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-				if(!statusItem)
-					[self initMenu];
 				break;
 			case kShowIconInDock:
-				[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-				[[NSStatusBar systemStatusBar] removeStatusItem:statusItem];
-				[statusItem release];
-				statusItem = nil;
 				break;
 			case kShowIconInMenu:
 			default:
-				if(!statusItem)
-					[self initMenu];
 				if(oldIconValue == kShowIconInBoth || oldIconValue == kShowIconInDock)
 					[self warnUserAboutIcons];
 				break;
 		}
+		[self applyIconVisibility:index];
 		oldIconValue = index;
 		[self syncModernPreferenceControls];
 	}
@@ -919,11 +885,11 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 			if(![[defaultController defaults] boolForKey:@"SuppressStartAtLogin"])
 			{
 				[NSApp activateIgnoringOtherApps:YES];
-				NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Alert! Enabling this option will add HardwareGrowler to your login items", nil)
-															defaultButton:NSLocalizedString(@"Ok", nil)
-														 alternateButton:NSLocalizedString(@"Cancel", nil)
-															  otherButton:nil
-											informativeTextWithFormat:NSLocalizedString(@"Allowing this will let HardwareGrowler launch everytime you login, so that it is available for applications which use it at all times", nil)];
+					NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+					[alert setMessageText:NSLocalizedString(@"Alert! Enabling this option will add HardwareGrowler to your login items", nil)];
+					[alert setInformativeText:NSLocalizedString(@"Allowing this will let HardwareGrowler launch everytime you login, so that it is available for applications which use it at all times", nil)];
+					[alert addButtonWithTitle:NSLocalizedString(@"Ok", nil)];
+					[alert addButtonWithTitle:NSLocalizedString(@"Cancel", nil)];
 				alert.showsSuppressionButton = YES;
 				NSInteger allow = [alert runModal];
 				if(allow == NSAlertFirstButtonReturn)
@@ -957,14 +923,9 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 	}
 }
 
-- (void)warnUserAboutIcons
-{
-	if((BOOL)isless(NSFoundationVersionNumber, NSFoundationVersionNumber10_7)) {
-		NSAlert *alert = [[[NSAlert alloc] init] autorelease];
-		[alert setMessageText:NSLocalizedString(@"This setting will take effect when Hardware Growler restarts",nil)];
-		[alert runModal];
+	- (void)warnUserAboutIcons
+	{
 	}
-}
 
 - (void) setStartAtLogin:(BOOL)enabled {
 	NSError *error = nil;
@@ -1060,9 +1021,10 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 		NSMutableDictionary *pluginDict = [[pluginController plugins] objectAtIndex:selection];
 		id<HWGrowlPluginProtocol> plugin = [pluginDict objectForKey:@"plugin"];
 		NSString *identifier = [[NSBundle bundleForClass:[plugin class]] bundleIdentifier];
-		NSNumber *disabled = [pluginDict objectForKey:@"disabled"];
+		BOOL disabled = ![[pluginDict objectForKey:@"disabled"] boolValue];
+		[pluginDict setObject:[NSNumber numberWithBool:disabled] forKey:@"disabled"];
 		
-		if([disabled boolValue]){
+		if(disabled){
 			if([plugin respondsToSelector:@selector(stopObserving)])
 				[plugin stopObserving];
 		}else{
@@ -1076,9 +1038,11 @@ static NSString * const HWGLoginHelperLaunchArgument = @"--hardwaregrowler-login
 		NSMutableDictionary *disabledDict = [[[defaults objectForKey:@"DisabledPlugins"] mutableCopy] autorelease];
 		if(!disabledDict)
 			disabledDict = [NSMutableDictionary dictionary];
-		[disabledDict setObject:disabled forKey:identifier];
+		[disabledDict setObject:[NSNumber numberWithBool:disabled] forKey:identifier];
 		[defaults setObject:disabledDict forKey:@"DisabledPlugins"];
 		[defaults synchronize];
+		[tableView reloadData];
+		[self reloadModernModulesPane];
 	}
 }
 

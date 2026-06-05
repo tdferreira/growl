@@ -48,7 +48,7 @@
 	}
 	
 	self.notificationsArePrimed = NO;
-	self.ioKitNotificationPort = IONotificationPortCreate(kIOMasterPortDefault);
+	self.ioKitNotificationPort = IONotificationPortCreate(kIOMainPortDefault);
 	self.notificationRunLoopSource = IONotificationPortGetRunLoopSource(ioKitNotificationPort);
 	
 	CFRunLoopAddSource(CFRunLoopGetCurrent(),

@@ -12,6 +12,25 @@
 
 extern NSString * const HWNotificationAdapterWillHandleNotificationResponseNotification;
 
+#define HWNotificationUserInfoNameKey @"notificationName"
+#define HWNotificationUserInfoPluginClassKey @"pluginClass"
+#define HWNotificationUserInfoContextKey @"context"
+#define HWNotificationUserInfoIdentifierKey @"identifier"
+
+static inline NSMutableDictionary *HWNotificationUserInfo(NSString *name, id plugin, NSString *context, NSString *identifier)
+{
+	NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+	if (name)
+		[userInfo setObject:name forKey:HWNotificationUserInfoNameKey];
+	if (plugin)
+		[userInfo setObject:NSStringFromClass([plugin class]) forKey:HWNotificationUserInfoPluginClassKey];
+	if (context)
+		[userInfo setObject:context forKey:HWNotificationUserInfoContextKey];
+	if (identifier)
+		[userInfo setObject:identifier forKey:HWNotificationUserInfoIdentifierKey];
+	return userInfo;
+}
+
 @protocol HWNotificationAdapterDelegate <NSObject>
 
 - (void)notificationAdapter:(HWNotificationAdapter *)adapter
@@ -26,6 +45,12 @@ didCloseNotificationForPluginClassName:(NSString *)pluginClassName
 @property (nonatomic, assign) id<HWNotificationAdapterDelegate> delegate;
 
 - (void)requestAuthorization;
+
++ (void)handleNotificationResponseActionIdentifier:(NSString *)actionIdentifier
+                                          userInfo:(NSDictionary *)userInfo
+                                          delegate:(id<HWNotificationAdapterDelegate>)responseDelegate
+                                           adapter:(HWNotificationAdapter *)adapter
+                                 completionHandler:(void (^)(void))completionHandler;
 
 - (void)notifyWithName:(NSString *)name
                  title:(NSString *)title

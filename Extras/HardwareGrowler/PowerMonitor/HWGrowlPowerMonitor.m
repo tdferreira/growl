@@ -7,11 +7,10 @@
 //
 
 #import "HWGrowlPowerMonitor.h"
+#import "../HardwareGrowler/HWSystemSettingsRoutes.h"
 #include <IOKit/IOKitLib.h>
 #include <IOKit/ps/IOPSKeys.h>
 #include <IOKit/ps/IOPowerSources.h>
-
-static NSString * const HWGBatterySettingsURLString = @"x-apple.systempreferences:com.apple.Battery-Settings.extension";
 
 @interface HWGrowlPowerMonitor ()
 
@@ -576,7 +575,7 @@ static void powerSourceChanged(void *context) {
 -(NSView*)preferencePane {
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
-		[NSBundle loadNibNamed:@"PowerMonitorPrefs" owner:self];
+		[[NSBundle bundleForClass:[self class]] loadNibNamed:@"PowerMonitorPrefs" owner:self topLevelObjects:nil];
 	});
 	return prefsView;
 }
@@ -603,7 +602,7 @@ static void powerSourceChanged(void *context) {
 		NSURL *settingsURL = [NSURL URLWithString:contextString];
 		dispatch_async(dispatch_get_main_queue(), ^{
 			if (![[NSWorkspace sharedWorkspace] openURL:settingsURL]) {
-				NSURL *fallbackURL = [NSURL URLWithString:@"x-apple.systempreferences:com.apple.preference.battery"];
+				NSURL *fallbackURL = [NSURL URLWithString:HWGBatteryFallbackSettingsURLString];
 				[[NSWorkspace sharedWorkspace] openURL:fallbackURL];
 			}
 		});

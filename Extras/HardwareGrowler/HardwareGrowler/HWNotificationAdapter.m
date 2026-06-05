@@ -8,10 +8,6 @@
 #import "HWNotificationAdapter.h"
 
 static NSString * const HWNotificationCategoryIdentifier = @"HardwareGrowlerNotification";
-static NSString * const HWNotificationUserInfoNameKey = @"notificationName";
-static NSString * const HWNotificationUserInfoPluginClassKey = @"pluginClass";
-static NSString * const HWNotificationUserInfoContextKey = @"context";
-static NSString * const HWNotificationUserInfoIdentifierKey = @"identifier";
 static NSString * const HWNotificationAttachmentDirectoryName = @"NotificationAttachments";
 
 NSString * const HWNotificationAdapterWillHandleNotificationResponseNotification = @"HWNotificationAdapterWillHandleNotificationResponseNotification";
@@ -45,6 +41,36 @@ NSString * const HWNotificationAdapterWillHandleNotificationResponseNotification
 	}];
 }
 
++ (void)handleNotificationResponseActionIdentifier:(NSString *)actionIdentifier
+                                          userInfo:(NSDictionary *)userInfo
+                                          delegate:(id<HWNotificationAdapterDelegate>)responseDelegate
+                                           adapter:(HWNotificationAdapter *)adapter
+                                 completionHandler:(void (^)(void))completionHandler
+{
+	BOOL clicked = [actionIdentifier isEqualToString:UNNotificationDefaultActionIdentifier];
+	BOOL dismissed = [actionIdentifier isEqualToString:UNNotificationDismissActionIdentifier];
+	
+	if (clicked || dismissed) {
+		if (clicked) {
+			[[NSNotificationCenter defaultCenter] postNotificationName:HWNotificationAdapterWillHandleNotificationResponseNotification
+																object:adapter];
+		}
+		
+		NSString *pluginClassName = [userInfo objectForKey:HWNotificationUserInfoPluginClassKey];
+		NSString *context = [userInfo objectForKey:HWNotificationUserInfoContextKey];
+		
+		if ([responseDelegate respondsToSelector:@selector(notificationAdapter:didCloseNotificationForPluginClassName:context:byClick:)]) {
+			[responseDelegate notificationAdapter:adapter
+ didCloseNotificationForPluginClassName:pluginClassName
+								  context:context
+								  byClick:clicked];
+		}
+	}
+	
+	if (completionHandler)
+		completionHandler();
+}
+
 - (void)notifyWithName:(NSString *)name
                  title:(NSString *)title
            description:(NSString *)description
@@ -59,16 +85,7 @@ NSString * const HWNotificationAdapterWillHandleNotificationResponseNotification
 	content.sound = [UNNotificationSound defaultSound];
 	content.categoryIdentifier = HWNotificationCategoryIdentifier;
 	
-	NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
-	if (name)
-		[userInfo setObject:name forKey:HWNotificationUserInfoNameKey];
-	if (plugin)
-		[userInfo setObject:NSStringFromClass([plugin class]) forKey:HWNotificationUserInfoPluginClassKey];
-	if (context)
-		[userInfo setObject:context forKey:HWNotificationUserInfoContextKey];
-	if (identifier)
-		[userInfo setObject:identifier forKey:HWNotificationUserInfoIdentifierKey];
-	content.userInfo = userInfo;
+		content.userInfo = HWNotificationUserInfo(name, plugin, context, identifier);
 	
 	NSString *requestIdentifier = identifier ? identifier : [[NSUUID UUID] UUIDString];
 	UNNotificationAttachment *attachment = [self notificationAttachmentForIconData:iconData
@@ -218,30 +235,12 @@ NSString * const HWNotificationAdapterWillHandleNotificationResponseNotification
 didReceiveNotificationResponse:(UNNotificationResponse *)response
          withCompletionHandler:(void (^)(void))completionHandler
 {
-	NSString *actionIdentifier = response.actionIdentifier;
-	BOOL clicked = [actionIdentifier isEqualToString:UNNotificationDefaultActionIdentifier];
-	BOOL dismissed = [actionIdentifier isEqualToString:UNNotificationDismissActionIdentifier];
-	
 	void (^handleResponse)(void) = ^{
-		if (clicked || dismissed) {
-			if (clicked) {
-				[[NSNotificationCenter defaultCenter] postNotificationName:HWNotificationAdapterWillHandleNotificationResponseNotification
-																	object:self];
-			}
-			
-			NSDictionary *userInfo = response.notification.request.content.userInfo;
-			NSString *pluginClassName = [userInfo objectForKey:HWNotificationUserInfoPluginClassKey];
-			NSString *context = [userInfo objectForKey:HWNotificationUserInfoContextKey];
-			
-			if ([delegate respondsToSelector:@selector(notificationAdapter:didCloseNotificationForPluginClassName:context:byClick:)]) {
-				[delegate notificationAdapter:self
- didCloseNotificationForPluginClassName:pluginClassName
-									  context:context
-									  byClick:clicked];
-			}
-		}
-		
-		completionHandler();
+		[HWNotificationAdapter handleNotificationResponseActionIdentifier:response.actionIdentifier
+																 userInfo:response.notification.request.content.userInfo
+																 delegate:delegate
+																  adapter:self
+														completionHandler:completionHandler];
 	};
 	
 	if ([NSThread isMainThread])

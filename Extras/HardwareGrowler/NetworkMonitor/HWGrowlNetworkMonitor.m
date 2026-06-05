@@ -124,6 +124,7 @@ typedef enum {
 @synthesize vpnInterfaceActiveStates;
 @synthesize vpnServiceInterfaces;
 @synthesize vpnServiceProtocolActiveStates;
+@synthesize locationAuthorizationRequester;
 
 -(id)init {
 	if((self = [super init])){
@@ -162,8 +163,11 @@ typedef enum {
 		[vpnServiceInterfaces release];
 		vpnServiceInterfaces = nil;
 		
-		[vpnServiceProtocolActiveStates release];
-		vpnServiceProtocolActiveStates = nil;
+	[vpnServiceProtocolActiveStates release];
+	vpnServiceProtocolActiveStates = nil;
+	
+	[locationAuthorizationRequester release];
+	locationAuthorizationRequester = nil;
 	    
 	[super dealloc];
 }
@@ -197,13 +201,12 @@ typedef enum {
 
 -(void)startObserving
 {
-		[self requestLocationAuthorizationIfNeeded];
-	   [self setupDynamicStore];
+	[self setupDynamicStore];
 	if (!dynStore)
 		return;
-		[self startMonitoringWiFiEvents];
+	[self startMonitoringWiFiEvents];
 		
-	    NSArray *watchedKeys = [NSArray arrayWithObjects:@"State:/Network/Interface/.*/Link", @"State:/Network/Interface/.*/AirPort", @"State:/Network/Global/IPv4", @"State:/Network/Global/IPv6", @"State:/Network/Service/.*/IPv4", @"State:/Network/Service/.*/IPv6", nil];
+	NSArray *watchedKeys = [NSArray arrayWithObjects:@"State:/Network/Interface/.*/Link", @"State:/Network/Interface/.*/AirPort", @"State:/Network/Global/IPv4", @"State:/Network/Global/IPv6", @"State:/Network/Service/.*/IPv4", @"State:/Network/Service/.*/IPv6", nil];
 	if (!SCDynamicStoreSetNotificationKeys(dynStore,
                                           NULL,
                                           (CFArrayRef)watchedKeys))
@@ -278,9 +281,7 @@ typedef enum {
 
 - (NSString *)networkNameFromAirPortStatus:(NSDictionary *)status interface:(NSString *)interfaceName
 {
-	NSString *networkName = [self currentWiFiSSIDForInterface:interfaceName];
-	if (!networkName)
-		networkName = [self stringFromSSIDValue:[status objectForKey:@"SSID_STR"]];
+	NSString *networkName = [self stringFromSSIDValue:[status objectForKey:@"SSID_STR"]];
 	if (!networkName)
 		networkName = [self stringFromSSIDValue:[status objectForKey:@"SSID"]];
 	return networkName;
@@ -288,27 +289,16 @@ typedef enum {
 
 - (NSString *)stringFromSSIDValue:(id)ssidValue
 {
-	NSMutableCharacterSet *trimCharacters = [[[NSCharacterSet whitespaceAndNewlineCharacterSet] mutableCopy] autorelease];
-	[trimCharacters formUnionWithCharacterSet:[NSCharacterSet controlCharacterSet]];
-	
-	if ([ssidValue isKindOfClass:[NSString class]]) {
-		NSString *trimmedSSID = [ssidValue stringByTrimmingCharactersInSet:trimCharacters];
-		return [trimmedSSID length] ? trimmedSSID : nil;
-	}
-	
-	if ([ssidValue isKindOfClass:[NSData class]]) {
-		NSString *ssidString = [[[NSString alloc] initWithData:ssidValue encoding:NSUTF8StringEncoding] autorelease];
-		if (!ssidString)
-			ssidString = [[[NSString alloc] initWithData:ssidValue encoding:NSISOLatin1StringEncoding] autorelease];
-		ssidString = [ssidString stringByTrimmingCharactersInSet:trimCharacters];
-		return [ssidString length] ? ssidString : nil;
-	}
-	
-	return nil;
+	return HWGNetworkStringFromSSIDValue(ssidValue);
 }
 
 - (void)requestLocationAuthorizationIfNeeded
 {
+	if (self.locationAuthorizationRequester) {
+		self.locationAuthorizationRequester();
+		return;
+	}
+	
 	if (![CLLocationManager locationServicesEnabled])
 		return;
 	
@@ -439,6 +429,7 @@ typedef enum {
 
 - (void)notifyCurrentWiFiNetworkForInterface:(NSString *)interfaceName retryCount:(NSUInteger)retryCount
 {
+	[self requestLocationAuthorizationIfNeeded];
 	NSString *networkName = [self currentWiFiSSIDForInterface:interfaceName];
 	NSString *bssid = [self currentWiFiBSSIDForInterface:interfaceName];
 	
@@ -461,7 +452,13 @@ typedef enum {
 - (void)notifyAirportConnectedForInterface:(NSString *)interfaceName status:(NSDictionary *)status bssid:(id)bssidValue retryCount:(NSUInteger)retryCount
 {
 	NSString *networkName = [self networkNameFromAirPortStatus:status interface:interfaceName];
-	id effectiveBSSID = bssidValue ? bssidValue : [self currentWiFiBSSIDForInterface:interfaceName];
+	id effectiveBSSID = bssidValue;
+	if (!networkName) {
+		[self requestLocationAuthorizationIfNeeded];
+		networkName = [self currentWiFiSSIDForInterface:interfaceName];
+		if (!effectiveBSSID)
+			effectiveBSSID = [self currentWiFiBSSIDForInterface:interfaceName];
+	}
 	
 	if (networkName) {
 		[self airportConnected:networkName bssid:effectiveBSSID];
@@ -557,21 +554,7 @@ typedef enum {
 
 - (NSString *)stringFromBSSIDValue:(id)bssidValue
 {
-	if ([bssidValue isKindOfClass:[NSString class]])
-		return [bssidValue length] ? bssidValue : nil;
-	
-	if ([bssidValue isKindOfClass:[NSData class]] && [bssidValue length] >= 6) {
-		const unsigned char *bssidBytes = [bssidValue bytes];
-		return [NSString stringWithFormat:@"%02X:%02X:%02X:%02X:%02X:%02X",
-				bssidBytes[0],
-				bssidBytes[1],
-				bssidBytes[2],
-				bssidBytes[3],
-				bssidBytes[4],
-				bssidBytes[5]];
-	}
-	
-	return nil;
+	return HWGNetworkStringFromBSSIDValue(bssidValue);
 }
 
 -(void)updateLinkWithInterface:(HWGrowlNetworkInterfaceStatus*)interface {

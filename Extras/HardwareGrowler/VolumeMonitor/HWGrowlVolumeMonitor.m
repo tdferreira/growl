@@ -7,6 +7,7 @@
 //
 
 #import "HWGrowlVolumeMonitor.h"
+#import "HWVolumeMonitorUtilities.h"
 
 #define VolumeNotifierUnmountWaitSeconds	600.0
 #define VolumeEjectCacheInfoIndex			0
@@ -208,7 +209,7 @@
 - (BOOL)shouldOpenMountedVolumeInFinder:(VolumeInfo *)volume
 {
 	NSString *path = [volume path];
-	if (![path hasPrefix:@"/Volumes/"])
+	if (!HWGVolumePathCanOpenInFinder(path))
 		return NO;
 	
 	NSURL *url = [NSURL fileURLWithPath:path isDirectory:YES];
@@ -220,10 +221,7 @@
 	BOOL removable = [self boolResourceValueForURL:url key:NSURLVolumeIsRemovableKey defaultValue:NO];
 	BOOL automounted = [self boolResourceValueForURL:url key:NSURLVolumeIsAutomountedKey defaultValue:NO];
 	
-	if (hidden || !browsable || !local || automounted)
-		return NO;
-	
-	return ejectable || removable || !internal;
+	return HWGVolumeResourcePolicyShouldOpenInFinder(hidden, browsable, local, internal, ejectable, removable, automounted);
 }
 
 - (BOOL)boolResourceValueForURL:(NSURL *)url key:(NSURLResourceKey)key defaultValue:(BOOL)defaultValue
@@ -374,7 +372,7 @@
 -(NSView*)preferencePane {
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
-		[NSBundle loadNibNamed:@"VolumeMonitorPrefs" owner:self];
+		[[NSBundle bundleForClass:[self class]] loadNibNamed:@"VolumeMonitorPrefs" owner:self topLevelObjects:nil];
 		[self modernizePreferencePane];
 	});
 	return prefsView;
@@ -398,15 +396,18 @@
 }
 
 -(void)fireOnLaunchNotes{
-	NSArray *paths = [[NSWorkspace sharedWorkspace] mountedLocalVolumePaths];
+	NSArray *resourceKeys = [NSArray arrayWithObjects:NSURLVolumeIsBrowsableKey, NSURLVolumeIsLocalKey, NSURLVolumeIsInternalKey, NSURLVolumeIsEjectableKey, NSURLVolumeIsRemovableKey, NSURLVolumeIsAutomountedKey, NSURLIsHiddenKey, nil];
+	NSArray *urls = [[NSFileManager defaultManager] mountedVolumeURLsIncludingResourceValuesForKeys:resourceKeys options:0];
 	__block HWGrowlVolumeMonitor *blockSelf = self;
-	[paths enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-		[blockSelf sendMountNotificationForVolume:[VolumeInfo volumeInfoForMountWithPath:obj] mounted:YES];
+	[urls enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+		NSString *path = [obj path];
+		if ([path length])
+			[blockSelf sendMountNotificationForVolume:[VolumeInfo volumeInfoForMountWithPath:path] mounted:YES];
 	}];
 }
 -(void)noteClosed:(NSString*)contextString byClick:(BOOL)clicked {
 	if(clicked && [contextString length]) {
-		if (![contextString hasPrefix:@"/Volumes/"])
+		if (!HWGVolumePathCanOpenInFinder(contextString))
 			return;
 		NSURL *volumeURL = [NSURL fileURLWithPath:contextString isDirectory:YES];
 		dispatch_async(dispatch_get_main_queue(), ^{

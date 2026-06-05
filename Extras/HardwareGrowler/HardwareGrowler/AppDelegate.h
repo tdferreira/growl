@@ -8,15 +8,9 @@
 
 #import <AppKit/AppKit.h>
 #import <Foundation/Foundation.h>
+#import "HWAppIconVisibility.h"
 
 @class GrowlOnSwitch, HWGrowlPluginController;
-
-typedef enum : NSInteger {
-	kShowIconInMenu = 0,
-	kShowIconInDock = 1,
-	kShowIconInBoth = 2,
-	kDontShowIcon = 3
-} HWGrowlIconState;
 
 @interface AppDelegate : NSObject <NSApplicationDelegate, NSToolbarDelegate, NSTableViewDelegate, NSWindowDelegate> {
 	NSWindow *_window;
@@ -68,9 +62,7 @@ typedef enum : NSInteger {
 	NSString *iconInDock;
 	NSString *iconInBoth;
 	NSString *noIcon;
-   
-   ProcessSerialNumber previousPSN;
-}
+	}
 
 @property (nonatomic, retain) IBOutlet NSString *showDevices;
 @property (nonatomic, retain) IBOutlet NSString *quitTitle;

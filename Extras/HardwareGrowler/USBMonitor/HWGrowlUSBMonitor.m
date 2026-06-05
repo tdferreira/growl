@@ -53,7 +53,7 @@ static void usbDeviceRemoved(void *refCon, io_iterator_t iterator);
 		return;
 	
 	self.notificationsArePrimed = NO;
-	self.ioKitNotificationPort = IONotificationPortCreate(kIOMasterPortDefault);
+	self.ioKitNotificationPort = IONotificationPortCreate(kIOMainPortDefault);
 	self.notificationRunLoopSource = IONotificationPortGetRunLoopSource(ioKitNotificationPort);
 	
 	CFRunLoopAddSource(CFRunLoopGetCurrent(),
@@ -118,7 +118,6 @@ static void usbDeviceRemoved(void *refCon, io_iterator_t iterator);
 		NSLog(@"Couldn't add device removal notification");
 	else
 		[self usbDeviceRemoved:removedIterator];
-		usbDeviceRemoved(NULL, removedIterator);
 	
 	self.notificationsArePrimed = YES;
 }
@@ -150,13 +149,13 @@ static void usbDeviceRemoved(void *refCon, io_iterator_t iterator);
 			//	but apparently not firewire
 			nameResult = IORegistryEntryGetName(thisObject, deviceNameChars);
 			if (nameResult != KERN_SUCCESS) {
-				NSLog(@"%s: Could not get name for USB object %p: IORegistryEntryGetName returned 0x%x", __PRETTY_FUNCTION__, (void*)thisObject, nameResult);
+				NSLog(@"%s: Could not get name for USB object 0x%x: IORegistryEntryGetName returned 0x%x", __PRETTY_FUNCTION__, thisObject, nameResult);
 				continue;
 			}
 			
 			idResult = IORegistryEntryGetRegistryEntryID(thisObject, &deviceID);
 			if(idResult != KERN_SUCCESS) {
-				NSLog(@"%s: Could not get EntryID for USB object %p: IORegistryEntryGetRegistryEntryID returned 0x%x", __PRETTY_FUNCTION__, (void*)thisObject, nameResult);
+				NSLog(@"%s: Could not get EntryID for USB object 0x%x: IORegistryEntryGetRegistryEntryID returned 0x%x", __PRETTY_FUNCTION__, thisObject, idResult);
 				continue;
 			}
 			
@@ -191,13 +190,13 @@ static void usbDeviceAdded(void *refCon, io_iterator_t iterator) {
 		//	but apparently not firewire
 		nameResult = IORegistryEntryGetName(thisObject, deviceNameChars);
 		if (nameResult != KERN_SUCCESS) {
-			NSLog(@"%s: Could not get name for USB object %p: IORegistryEntryGetName returned 0x%x", __PRETTY_FUNCTION__, (void*)thisObject, nameResult);
+			NSLog(@"%s: Could not get name for USB object 0x%x: IORegistryEntryGetName returned 0x%x", __PRETTY_FUNCTION__, thisObject, nameResult);
 			continue;
 		}
 		
 		idResult = IORegistryEntryGetRegistryEntryID(thisObject, &deviceID);
 		if(idResult != KERN_SUCCESS) {
-			NSLog(@"%s: Could not get EntryID for USB object %p: IORegistryEntryGetRegistryEntryID returned 0x%x", __PRETTY_FUNCTION__, (void*)thisObject, nameResult);
+			NSLog(@"%s: Could not get EntryID for USB object 0x%x: IORegistryEntryGetRegistryEntryID returned 0x%x", __PRETTY_FUNCTION__, thisObject, idResult);
 			continue;
 		}
 		
