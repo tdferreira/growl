@@ -102,14 +102,18 @@ jobs:
           set -euo pipefail
 
           version="${TAG_NAME#hardwaregrowler-v}"
-          prerelease_args=()
-          if [[ "${PRERELEASE}" == "true" ]]; then
-            prerelease_args+=(--prerelease)
-          fi
 
-          gh release create "${TAG_NAME}" \
-            build/dist/HardwareGrowler-Universal2.zip \
-            build/dist/HardwareGrowler-Universal2.dmg \
-            --title "HardwareGrowler ${version}" \
-            --notes-file build/dist/release-notes.md \
-            "${prerelease_args[@]}"
+          if [[ "${PRERELEASE}" == "true" ]]; then
+            gh release create "${TAG_NAME}" \
+              build/dist/HardwareGrowler-Universal2.zip \
+              build/dist/HardwareGrowler-Universal2.dmg \
+              --title "HardwareGrowler ${version}" \
+              --notes-file build/dist/release-notes.md \
+              --prerelease
+          else
+            gh release create "${TAG_NAME}" \
+              build/dist/HardwareGrowler-Universal2.zip \
+              build/dist/HardwareGrowler-Universal2.dmg \
+              --title "HardwareGrowler ${version}" \
+              --notes-file build/dist/release-notes.md
+          fi
