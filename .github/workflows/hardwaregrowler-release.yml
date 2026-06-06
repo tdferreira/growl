@@ -81,7 +81,7 @@ jobs:
           fi
 
           version="${TAG_NAME#hardwaregrowler-v}"
-          commit_limit=75
+          commit_limit=15
 
           {
             printf '# HardwareGrowler %s\n\n' "${version}"
@@ -100,13 +100,15 @@ jobs:
 
               git log --max-count="${commit_limit}" --pretty=format:'- %s ([%h](https://github.com/'"${GITHUB_REPOSITORY}"'/commit/%H))' "${commit_range}"
             else
-              commit_count="$(git rev-list --count "${commit_range}" -- Extras/HardwareGrowler .github/workflows/hardwaregrowler.yml .github/workflows/hardwaregrowler-release.yml)"
-              printf '_Initial automated HardwareGrowler release. Showing recent HardwareGrowler-related commits._\n\n'
-              if (( commit_count > commit_limit )); then
-                printf '_Showing the latest %s of %s matching commits. See the full commit list below._\n\n' "${commit_limit}" "${commit_count}"
+              if git rev-parse "${TAG_NAME}~${commit_limit}" >/dev/null 2>&1; then
+                base_ref="$(git rev-parse "${TAG_NAME}~${commit_limit}")"
+                commit_range="${base_ref}..${TAG_NAME}"
+                compare_url="https://github.com/${GITHUB_REPOSITORY}/compare/${base_ref}...${TAG_NAME}"
               fi
 
-              git log --max-count="${commit_limit}" --pretty=format:'- %s ([%h](https://github.com/'"${GITHUB_REPOSITORY}"'/commit/%H))' "${commit_range}" -- Extras/HardwareGrowler .github/workflows/hardwaregrowler.yml .github/workflows/hardwaregrowler-release.yml
+              commit_count="$(git rev-list --count "${commit_range}")"
+              printf '_Initial automated HardwareGrowler release. Showing the %s commits that led to this build._\n\n' "${commit_count}"
+              git log --max-count="${commit_limit}" --pretty=format:'- %s ([%h](https://github.com/'"${GITHUB_REPOSITORY}"'/commit/%H))' "${commit_range}"
             fi
             printf '\n\n## Full Commit List\n\n'
             printf '%s\n' "${compare_url}"
