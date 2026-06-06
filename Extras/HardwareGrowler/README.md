@@ -345,6 +345,20 @@ GitHub releases publish both package formats:
 
 - `HardwareGrowler-Universal2.zip` contains `HardwareGrowler.app` in a plain ZIP archive. This is usually the easiest artifact to download and unpack.
 - `HardwareGrowler-Universal2.dmg` contains `HardwareGrowler.app` in a compressed disk image. Use this if you prefer a mountable macOS disk image.
+- `HardwareGrowler-Universal2.sha256` contains SHA-256 checksums for the ZIP and DMG artifacts.
+
+After downloading the checksum file and both artifacts, verify them locally:
+
+```sh
+shasum -a 256 -c HardwareGrowler-Universal2.sha256
+```
+
+The release workflow also generates GitHub artifact attestations for the ZIP and DMG artifacts. Users can verify the published artifacts with GitHub CLI:
+
+```sh
+gh attestation verify HardwareGrowler-Universal2.zip -R tdferreira/growl
+gh attestation verify HardwareGrowler-Universal2.dmg -R tdferreira/growl
+```
 
 The release artifacts are ad-hoc signed by CI and are not Apple-notarized. They are suitable for open source distribution and local re-signing, but they will not have the same first-launch experience as a Developer ID signed and notarized app.
 
