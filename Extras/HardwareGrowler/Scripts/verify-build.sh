@@ -10,6 +10,15 @@ DERIVED_UNIVERSAL="$ROOT_DIR/.xcode-derived-data-universal"
 PRODUCTS_DIR="$DERIVED_UNIVERSAL/Build/Products/Release"
 APP="$PRODUCTS_DIR/HardwareGrowler.app"
 BUILD_LOG="$DERIVED_UNIVERSAL/hardwaregrowler-release-build.log"
+VERSION_BUILD_SETTINGS=()
+
+if [[ -n "${HWG_VERSION_OVERRIDE:-}" ]]; then
+	if [[ ! "$HWG_VERSION_OVERRIDE" =~ '^[0-9]+([.][0-9]+)*$' ]]; then
+		printf 'error: HWG_VERSION_OVERRIDE must be a numeric dotted version, got %s\n' "$HWG_VERSION_OVERRIDE" >&2
+		exit 1
+	fi
+	VERSION_BUILD_SETTINGS=("HWG_VERSION=$HWG_VERSION_OVERRIDE")
+fi
 
 log() {
 	printf '\n==> %s\n' "$1"
@@ -31,6 +40,21 @@ require_archs() {
 	[[ " $archs " == *" x86_64 "* ]] || fail "$label is missing x86_64"
 }
 
+bundle_version() {
+	local bundle="$1"
+	/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$bundle/Contents/Info.plist"
+}
+
+require_bundle_version() {
+	local bundle="$1"
+	local label="$2"
+	local expected="$3"
+	local version
+	version="$(bundle_version "$bundle")"
+	printf '%s version: %s\n' "$label" "$version"
+	[[ "$version" == "$expected" ]] || fail "$label version is $version; expected $expected"
+}
+
 log "Running HardwareGrowler tests"
 xcodebuild \
 	-project "$PROJECT" \
@@ -38,6 +62,7 @@ xcodebuild \
 	-configuration Debug \
 	-destination platform=macOS \
 	-derivedDataPath "$DERIVED_TESTS" \
+	"${VERSION_BUILD_SETTINGS[@]}" \
 	CODE_SIGN_IDENTITY=- \
 	CODE_SIGNING_ALLOWED=YES \
 	test
@@ -55,6 +80,7 @@ if xcodebuild \
 		-derivedDataPath "$DERIVED_UNIVERSAL" \
 		ARCHS="arm64 x86_64" \
 		ONLY_ACTIVE_ARCH=NO \
+		"${VERSION_BUILD_SETTINGS[@]}" \
 		CODE_SIGN_IDENTITY=- \
 		CODE_SIGNING_ALLOWED=YES \
 		build > "$BUILD_LOG" 2>&1; then
@@ -80,6 +106,16 @@ for binary in "$APP"/Contents/PlugIns/*.hwgrowlmonitor/Contents/MacOS/*; do
 	require_archs "$binary" "$(basename "$binary")"
 done
 [[ "$plugin_count" -gt 0 ]] || fail "No shipped HardwareGrowler plug-ins found"
+
+log "Checking app, helper, and plug-in versions"
+expected_version="${HWG_VERSION_OVERRIDE:-$(bundle_version "$APP")}"
+require_bundle_version "$APP" "HardwareGrowler" "$expected_version"
+require_bundle_version "$APP/Contents/Library/LoginItems/HardwareGrowlerLauncher.app" "HardwareGrowlerLauncher" "$expected_version"
+
+for plugin in "$APP"/Contents/PlugIns/*.hwgrowlmonitor; do
+	[[ -d "$plugin" ]] || continue
+	require_bundle_version "$plugin" "$(basename "$plugin")" "$expected_version"
+done
 
 log "Checking built app for removed Growl artifacts"
 # HardwareGrowler now uses native UserNotifications; the built app should not

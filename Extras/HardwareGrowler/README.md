@@ -364,11 +364,11 @@ The release artifacts are ad-hoc signed by CI and are not Apple-notarized. They 
 
 ### Automated GitHub Releases
 
-Push an annotated tag named `hardwaregrowler-v<version>` to build and publish a GitHub release:
+Push an annotated tag named `hardwaregrowler-v<version>` to build and publish a GitHub release. The release workflow uses this tag version for the built app, login helper, and bundled monitor plug-ins.
 
 ```sh
-git tag -a hardwaregrowler-v1.0.0 -m "HardwareGrowler 1.0.0"
-git push origin hardwaregrowler-v1.0.0
+git tag -a hardwaregrowler-v3.0 -m "HardwareGrowler 3.0"
+git push origin hardwaregrowler-v3.0
 ```
 
 The release workflow:

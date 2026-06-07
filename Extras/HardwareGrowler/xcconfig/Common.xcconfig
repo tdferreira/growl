@@ -8,7 +8,7 @@
 
 #include "../../xcconfig/Common.xcconfig"
 
-HWG_VERSION = 2.1
+HWG_VERSION = 3.0
 COPYRIGHT = Copyright © 2012 The Growl Project, LLC. All rights reserved.
 SDKROOT = macosx
 MACOSX_DEPLOYMENT_TARGET = 13.0

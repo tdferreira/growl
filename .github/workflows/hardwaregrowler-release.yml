@@ -44,7 +44,10 @@ jobs:
             exit 1
           fi
 
+          version="${tag_name#hardwaregrowler-v}"
+
           echo "tag_name=${tag_name}" >> "${GITHUB_OUTPUT}"
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
 
       - name: Check out repository
         uses: actions/checkout@v6
@@ -57,6 +60,8 @@ jobs:
 
       - name: Verify HardwareGrowler build
         timeout-minutes: 10
+        env:
+          HWG_VERSION_OVERRIDE: ${{ steps.release-tag.outputs.version }}
         run: Extras/HardwareGrowler/Scripts/verify-build.sh
 
       - name: Package release artifacts
